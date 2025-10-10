@@ -23,7 +23,10 @@ data "aws_iam_policy_document" "codebuild_policy" {
       "ecr:DescribeRepositories",
       "ecr:GetDownloadUrlForLayer"
     ]
-    resources = [aws_ecr_repository.app.arn]
+    resources = [
+      "${aws_ecr_repository.app.arn}",
+      "${aws_ecr_repository.python.arn}",
+    ]
   }
   statement {
     sid    = "Logs"
