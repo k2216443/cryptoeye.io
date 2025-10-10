@@ -1,0 +1,6 @@
+.env
+venv
+
+# Ignore every __pycache__ directory everywhere
+**/__pycache__/
+__pycache__/

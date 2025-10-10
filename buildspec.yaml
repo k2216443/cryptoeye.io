@@ -1,0 +1,22 @@
+version: "0.2"
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - aws ecr get-login-password --region ${var.aws_region} | docker login --username AWS --password-stdin ${aws_ecr_repository.app.repository_url%/*}
+      - COMMIT_SHA=${"$"}CODEBUILD_RESOLVED_SOURCE_VERSION
+      - IMAGE_TAG=${"$"}{COMMIT_SHA:0:12}
+  build:
+    commands:
+      - echo Building image ${"$"}IMAGE_REPO_URI:${"$"}IMAGE_TAG
+      - docker build -t ${"$"}IMAGE_REPO_URI:${"$"}IMAGE_TAG -t ${"$"}IMAGE_REPO_URI:latest .
+  post_build:
+    commands:
+      - echo Pushing to ECR...
+      - docker push ${"$"}IMAGE_REPO_URI:${"$"}IMAGE_TAG
+      - docker push ${"$"}IMAGE_REPO_URI:latest
+      - printf '{"image":"%s","tag":"%s"}' ${"$"}IMAGE_REPO_URI ${"$"}IMAGE_TAG > image-detail.json
+artifacts:
+  files:
+    - image-detail.json
