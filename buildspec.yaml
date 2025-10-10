@@ -14,7 +14,7 @@ phases:
     commands:
       - echo Pushing to ECR...
       - docker push 292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:${IMAGE_TAG} 
-      - printf 292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:${IMAGE_TAG} > image-detail.json
+      - echo "292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:${IMAGE_TAG}" > image-detail.json
 artifacts:
   files:
     - image-detail.json
