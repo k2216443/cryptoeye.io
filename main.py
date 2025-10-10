@@ -1,9 +1,45 @@
+import re
+from typing import Any, Dict
+from contextlib import asynccontextmanager
+from functools import partial
+
+import anyio
+from fastapi import FastAPI, Query
+from fastapi.responses import JSONResponse
 
 from providers.etherscan import Etherscan
 
+ADDR_RE = re.compile(r"^0x[a-fA-F0-9]{40}$")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.state.scanner = Etherscan()
+    yield
+
+
+app = FastAPI(title="Wallet Security Evaluator", lifespan=lifespan)
+
+
+def is_valid_eth_address(addr: str) -> bool:
+    return bool(ADDR_RE.fullmatch(addr))
+
+
+@app.get("/evaluate")
+async def evaluate(addr: str = Query(..., description="Ethereum address 0x...")) -> JSONResponse:
+    if not is_valid_eth_address(addr):
+        return JSONResponse(
+            status_code=400,
+            content={"ok": False, "error": "invalid address format, expected 0x + 40 hex chars"},
+        )
+
+    scanner: Etherscan = app.state.scanner
+    fn = partial(scanner.evaluate_address_security, address=addr, mode="full")
+    result: Dict[str, Any] = await anyio.to_thread.run_sync(fn)
+
+    return JSONResponse(content={"ok": True, "address": addr, "result": result})
+
 
 if __name__ == "__main__":
-
-    etherscan = Etherscan()
-    etherscan.get_eth_balance(address="0x4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f97")
-    etherscan.evaluate_address_security(address="0x4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f97", mode="full")
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
