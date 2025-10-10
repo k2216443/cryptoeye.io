@@ -5,7 +5,7 @@ phases:
       - echo Logging in to Amazon ECR...
       - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
       - aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye
-      - IMAGE_TAG=$(git describe --always --long)
+      - IMAGE_TAG=$(cat version)-$(git describe --always --long)
   build:
     commands:
       - echo Building image 292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:$IMAGE_TAG
