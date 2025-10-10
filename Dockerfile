@@ -3,7 +3,7 @@
 ############################
 # Builder: make dependency wheels
 ############################
-FROM python:3.12-slim AS builder
+FROM 292875404443.dkr.ecr.us-west-2.amazonaws.com/python:3.12-slim AS builder
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_NO_CACHE_DIR=1
 
 # Build tools (removed from final image)
@@ -26,7 +26,7 @@ RUN python -m compileall -q .
 ############################
 # Runtime: tiny image
 ############################
-FROM python:3.12-slim AS runtime
+FROM 292875404443.dkr.ecr.us-west-2.amazonaws.com/python:3.12-slim AS runtime
 ENV PYTHONUNBUFFERED=1 PYTHONOPTIMIZE=2
 
 # Non-root
