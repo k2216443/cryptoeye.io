@@ -7,7 +7,7 @@ resource "aws_codebuild_webhook" "any_branch" {
     }
     filter {
       type    = "HEAD_REF"
-      pattern = ".*"
+      pattern = "main"
     }
   }
 }
