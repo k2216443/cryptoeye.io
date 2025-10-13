@@ -11,6 +11,15 @@ data "aws_iam_policy_document" "codebuild_policy" {
     resources = ["*"]
   }
   statement {
+    sid     = "LambdaUpdate"
+    effect  = "Allow"
+    actions = [
+      "lambda:UpdateFunctionCode",
+      "lambda:GetFunctionConfiguration"
+    ]
+    resources = [aws_lambda_function.fn.arn]
+  }
+  statement {
     sid    = "ECRPush"
     effect = "Allow"
     actions = [
