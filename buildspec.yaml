@@ -19,7 +19,7 @@ phases:
       - aws lambda update-function-code --function-name cryptoeye --image-uri 292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:${IMAGE_TAG} --region us-west-2
       - TG_TOKEN=$(aws ssm get-parameter --name "/cryptoeye/telegram_bot_token" --with-decryption --query Parameter.Value --output text)
       - TG_CHAT_ID=$(aws ssm get-parameter --name "/cryptoeye/telegram_chat_id" --query Parameter.Value --output text)
-      - MSG="✅ Build ok. Image: ${IMAGE_URI}"
+      - MSG="292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:${IMAGE_TAG}"
       - curl -sS -X POST "https://api.telegram.org/bot${TG_TOKEN}/sendMessage"  --data-urlencode "chat_id=${TG_CHAT_ID}" --data-urlencode "text=${MSG}" --data-urlencode "disable_web_page_preview=true"
       - echo "292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:${IMAGE_TAG}" > image-detail.json
 
