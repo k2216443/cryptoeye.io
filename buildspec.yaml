@@ -17,7 +17,10 @@ phases:
       - echo "Updating Lambda function to new image..."
       - echo "aws --profile cryptoeye lambda update-function-code --function-name cryptoeye --image-uri 292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:${IMAGE_TAG} --region us-west-2"
       - aws lambda update-function-code --function-name cryptoeye --image-uri 292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:${IMAGE_TAG} --region us-west-2
+      - TG_TOKEN=$(aws ssm get-parameter --name "/cryptoeye/telegram_bot_token" --with-decryption --query Parameter.Value --output text)
+      - TG_CHAT_ID=$(aws ssm get-parameter --name "/cryptoeye/telegram_chat_id" --query Parameter.Value --output text)
       - echo "292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:${IMAGE_TAG}" > image-detail.json
+
 artifacts:
   files:
     - image-detail.json

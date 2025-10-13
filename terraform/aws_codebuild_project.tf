@@ -6,11 +6,11 @@ resource "aws_codebuild_project" "build" {
   artifacts { type = "NO_ARTIFACTS" }
 
   environment {
-    compute_type                = "BUILD_GENERAL1_SMALL"
+    compute_type = "BUILD_GENERAL1_SMALL"
 
     # Ubuntu 22.04 + Docker
-    image                       = "aws/codebuild/standard:7.0"
-    type                        = "LINUX_CONTAINER"
+    image = "aws/codebuild/standard:7.0"
+    type  = "LINUX_CONTAINER"
 
     # needed for docker build
     privileged_mode             = true
@@ -29,7 +29,7 @@ resource "aws_codebuild_project" "build" {
 
   logs_config {
     cloudwatch_logs {
-        status = "ENABLED" 
+      status = "ENABLED"
     }
   }
 

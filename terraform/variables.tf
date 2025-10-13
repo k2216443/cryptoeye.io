@@ -29,15 +29,19 @@ variable "aws_region" {
 }
 
 variable "github_owner" {
-  type = string
+  type    = string
   default = "k2216443"
 }
 
 variable "github_repo" {
-  type = string
+  type    = string
   default = "cryptoeye.io"
 }
 
 variable "image_uri" {
+  type = string
+}
+
+variable "telegram_bot_token" {
   type = string
 }

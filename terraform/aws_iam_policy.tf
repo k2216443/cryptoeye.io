@@ -5,14 +5,22 @@ resource "aws_iam_policy" "codebuild" {
 
 data "aws_iam_policy_document" "codebuild_policy" {
   statement {
-    sid     = "ECRAuth"
-    effect  = "Allow"
-    actions = ["ecr:GetAuthorizationToken"]
+    sid       = "ECRAuth"
+    effect    = "Allow"
+    actions   = ["ecr:GetAuthorizationToken"]
     resources = ["*"]
   }
+    statement {
+    effect = "Allow"
+    actions = ["ssm:GetParameter", "ssm:GetParameters", "ssm:GetParameterHistory"]
+    resources = [
+      aws_ssm_parameter.tg_bot_token.arn,
+      aws_ssm_parameter.tg_chat_id.arn
+    ]
+  }
   statement {
-    sid     = "LambdaUpdate"
-    effect  = "Allow"
+    sid    = "LambdaUpdate"
+    effect = "Allow"
     actions = [
       "lambda:UpdateFunctionCode",
       "lambda:GetFunctionConfiguration"
@@ -48,9 +56,9 @@ data "aws_iam_policy_document" "codebuild_policy" {
     resources = ["*"]
   }
   statement {
-    sid     = "STSRead"
-    effect  = "Allow"
-    actions = ["sts:GetCallerIdentity"]
+    sid       = "STSRead"
+    effect    = "Allow"
+    actions   = ["sts:GetCallerIdentity"]
     resources = ["*"]
   }
 }

@@ -13,9 +13,9 @@ data "aws_iam_policy_document" "codebuild_assume" {
   statement {
     effect  = "Allow"
     actions = ["sts:AssumeRole"]
-    principals { 
-        type = "Service"
-        identifiers = ["codebuild.amazonaws.com"] 
+    principals {
+      type        = "Service"
+      identifiers = ["codebuild.amazonaws.com"]
     }
   }
 }
@@ -24,18 +24,18 @@ data "aws_iam_policy_document" "assume_lambda" {
   statement {
     effect  = "Allow"
     actions = ["sts:AssumeRole"]
-    principals { 
-      type = "Service"
-      identifiers = ["lambda.amazonaws.com"] 
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
     }
   }
 }
 
 data "aws_iam_policy_document" "lambda_ecr_pull" {
   statement {
-    sid     = "ECRAuthToken"
-    effect  = "Allow"
-    actions = ["ecr:GetAuthorizationToken"]
+    sid       = "ECRAuthToken"
+    effect    = "Allow"
+    actions   = ["ecr:GetAuthorizationToken"]
     resources = ["*"]
   }
 

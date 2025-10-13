@@ -9,5 +9,7 @@ resource "aws_lambda_function" "fn" {
   memory_size   = "512"
   timeout       = "30"
 
-  depends_on = [ aws_iam_role.lambda_role ]
+  depends_on = [aws_iam_role.lambda_role]
+
+  
 }
