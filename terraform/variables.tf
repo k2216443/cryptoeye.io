@@ -37,3 +37,7 @@ variable "github_repo" {
   type = string
   default = "cryptoeye.io"
 }
+
+variable "image_uri" {
+  type = string
+}

@@ -45,3 +45,8 @@ data "aws_iam_policy_document" "codebuild_policy" {
     resources = ["*"]
   }
 }
+
+resource "aws_iam_policy" "lambda_ecr_pull" {
+  name   = "${var.name}-ecr-pull"
+  policy = data.aws_iam_policy_document.lambda_ecr_pull.json
+}
