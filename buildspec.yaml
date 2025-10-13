@@ -15,10 +15,7 @@ phases:
       - echo Pushing to ECR...
       - docker push 292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:${IMAGE_TAG} 
       - echo "Updating Lambda function to new image..."
-      - aws lambda update-function-code \
-          --function-name cryptoeye \
-          --image-uri 292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:${IMAGE_TAG} \
-          --region us-west-2
+      - aws lambda update-function-code --function-name cryptoeye --image-uri 292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:${IMAGE_TAG} --region us-west-2
       - echo "292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:${IMAGE_TAG}" > image-detail.json
 artifacts:
   files:
