@@ -38,6 +38,10 @@ variable "github_repo" {
   default = "cryptoeye.io"
 }
 
+variable "ETHERSCAN_API_KEY" {
+ type = string 
+}
+
 variable "image_uri" {
   type = string
 }

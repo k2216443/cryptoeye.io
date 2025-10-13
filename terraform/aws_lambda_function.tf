@@ -6,9 +6,13 @@ resource "aws_lambda_function" "fn" {
   image_uri    = var.image_uri
 
   architectures = ["x86_64"]
-  memory_size   = "64"
+  memory_size   = "128"
   timeout       = "10"
-
+  environment {
+    variables = {
+      ETHERSCAN_API_KEY = var.ETHERSCAN_API_KEY
+    }
+  }
   depends_on = [aws_iam_role.lambda_role]
 
   lifecycle {
