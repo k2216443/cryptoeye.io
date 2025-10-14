@@ -3,8 +3,10 @@ from typing import Any, Dict
 from contextlib import asynccontextmanager
 from functools import partial
 
+import json
+
 import anyio
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Request
 from fastapi.responses import JSONResponse
 
 from providers.etherscan import Etherscan
@@ -24,9 +26,23 @@ app = FastAPI(title="Wallet Security Evaluator", lifespan=lifespan)
 def is_valid_eth_address(addr: str) -> bool:
     return bool(ADDR_RE.fullmatch(addr))
 
+SENSITIVE = {"authorization", "cookie", "set-cookie", "x-api-key"}
+def redact_headers(hdrs):
+    out = {}
+    for k, v in hdrs.items():
+        lk = k.lower()
+        out[lk] = "***" if lk in SENSITIVE else v
+    return out
 
 @app.get("/evaluate")
-async def evaluate(addr: str = Query(..., description="Ethereum address 0x...")) -> JSONResponse:
+async def evaluate(request: Request, addr: str = Query(..., description="Ethereum address 0x...")) -> JSONResponse:
+
+    print(json.dumps({
+        "event": "evaluate_start",
+        "addr": addr,
+        "headers": redact_headers(request.headers)
+    }))
+        
     if not is_valid_eth_address(addr):
         return JSONResponse(
             status_code=400,

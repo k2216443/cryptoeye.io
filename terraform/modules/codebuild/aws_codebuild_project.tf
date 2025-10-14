@@ -9,8 +9,8 @@ resource "aws_codebuild_project" "build" {
     compute_type = "BUILD_GENERAL1_SMALL"
 
     # Ubuntu 22.04 + Docker
-    image = "aws/codebuild/standard:7.0"
-    type  = "LINUX_CONTAINER"
+    image = var.image
+    type  = var.type
 
     # needed for docker build
     privileged_mode             = true

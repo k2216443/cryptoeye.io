@@ -1,3 +1,4 @@
+*.backup
 terraform.auto.tfvars
 .terraform
 .terraform.lock.hcl
