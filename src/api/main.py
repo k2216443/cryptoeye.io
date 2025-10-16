@@ -34,6 +34,8 @@ def redact_headers(hdrs):
         out[lk] = "***" if lk in SENSITIVE else v
     return out
 
+def redact_dict(d: Dict[str, Any]) -> Dict[str, Any]:
+    return {k: ("***" if k.lower() in SENSITIVE else v) for k, v in d.items()}
 
 @app.get("/health")
 async def evaluate(request: Request) -> JSONResponse:
@@ -42,6 +44,34 @@ async def evaluate(request: Request) -> JSONResponse:
         content={"ok": True}
     )
 
+@app.api_route("/t", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
+async def trace(request: Request) -> JSONResponse:
+    # best-effort JSON body
+    body_json: Any = None
+    body_text: str | None = None
+    try:
+        body_json = await request.json()
+        if isinstance(body_json, dict):
+            body_json = redact_dict(body_json)
+    except Exception:
+        raw = await request.body()
+        body_text = raw.decode("utf-8", "ignore")[:10000] if raw else None  # cap length
+
+    log_payload = {
+        "event": "trace_request",
+        "method": request.method,
+        "url": str(request.url),
+        "client": getattr(request.client, "host", None),
+        "headers": redact_headers(request.headers),
+        "query": redact_dict(dict(request.query_params)),
+        "cookies": redact_dict(request.cookies),
+        "path_params": request.path_params,
+        "body_json": body_json,
+        "body_text": body_text,
+    }
+    print(json.dumps(log_payload, ensure_ascii=False))
+
+    return JSONResponse(status_code=200, content={"ok": True})
 
 @app.get("/evaluate")
 async def evaluate(request: Request, addr: str = Query(..., description="Ethereum address 0x...")) -> JSONResponse:

@@ -4,7 +4,7 @@ resource "aws_lb_target_group" "backend" {
   protocol = "HTTP"
   vpc_id   = module.network.vpc_id
   health_check {
-    path                = "/"
+    path                = "/health"
     protocol            = "HTTP"
     healthy_threshold   = 2
     unhealthy_threshold = 2

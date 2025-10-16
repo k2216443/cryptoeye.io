@@ -92,6 +92,8 @@ def main() -> None:
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
 
     # Run the bot until the user presses Ctrl-C
+
+    application.bot.set_webhook(url="https://chaineye.io/t", allowed_updates=Update.ALL_TYPES)
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
