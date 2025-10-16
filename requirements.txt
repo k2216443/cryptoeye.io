@@ -3,3 +3,4 @@ mangum
 pytest
 requests
 uvicorn
+anyio
