@@ -54,10 +54,7 @@ module "ec2" {
     {
       "Effect": "Allow",
       "Action": [
-        "ecr:DescribeImages",
-        "ecr:GetAuthorizationToken",
-        "ecr:GetDownloadUrlForLayer",
-        "ecr:BatchGetImage"
+        "ecr:*"
       ],
       "Resource": "*"
     }
