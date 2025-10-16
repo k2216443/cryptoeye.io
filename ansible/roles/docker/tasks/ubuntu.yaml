@@ -1,0 +1,48 @@
+---
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: "yes"
+    cache_valid_time: "3600"
+
+- name: Upgrade all apt packages
+  ansible.builtin.apt:
+    upgrade: dist
+
+- name: Install dependencies
+  ansible.builtin.apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: true
+  vars:
+    packages:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - python3-pip
+      - software-properties-common
+      - gnupg-agent
+
+- name: Pip
+  ansible.builtin.pip:
+    name: docker
+
+- name: Add an apt signing key for Docker
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add apt repository for stable version
+  ansible.builtin.apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+    state: present
+
+- name: Install Docker
+  ansible.builtin.apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: true
+  vars:
+    packages:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io

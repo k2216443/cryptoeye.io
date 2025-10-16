@@ -1,0 +1,10 @@
+# Documentation: https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_ec2_inventory.html
+plugin: amazon.aws.aws_ec2
+profile: cryptoeye
+regions:
+  - us-west-2
+hostnames:
+  - tag:Name
+compose:
+  ansible_host: public_ip_address
+  ansible_user: "ec2-user"

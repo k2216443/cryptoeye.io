@@ -1,0 +1,5 @@
+- name: python3-urllib3 remove
+  ansible.builtin.package:
+    name:
+      - awscli-2
+    state: absent

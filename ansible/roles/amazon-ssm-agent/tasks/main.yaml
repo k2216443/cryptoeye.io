@@ -1,0 +1,11 @@
+- name: "Task::ansible.builtin.dnf: amazon-ssm-agent"
+  ansible.builtin.dnf:
+    name:
+      - amazon-ssm-agent
+    state: present
+
+- name: "Task::ansible.builtin.systemd: amazon-ssm-agent.service"
+  ansible.builtin.systemd:
+    name: amazon-ssm-agent
+    state: started
+    enabled: true

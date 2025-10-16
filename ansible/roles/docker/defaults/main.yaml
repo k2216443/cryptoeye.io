@@ -1,0 +1,13 @@
+docker_daemon:
+  hosts:
+    - "unix:///var/run/docker.sock"
+    - "tcp://127.0.0.1:4243"
+  bip: "192.168.1.1/24"
+  fixed-cidr: "192.168.1.0/25"
+  log-driver: "json-file"
+  log-opts:
+    max-size: "100m"
+    max-file: "10"
+  live-restore: true
+  dns:
+    - "8.8.8.8"

@@ -1,0 +1,5 @@
+- name: "Login to AWS ECR"
+  ansible.builtin.shell:
+    executable: "/bin/bash"
+    cmd: "aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 292875404443.dkr.ecr.us-west-2.amazonaws.com"
+  changed_when: false

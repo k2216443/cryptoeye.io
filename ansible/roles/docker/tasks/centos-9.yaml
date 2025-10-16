@@ -1,0 +1,49 @@
+---
+# Install packages
+- name: Packages
+  ansible.builtin.package:
+    name:
+      - bash-completion
+      - jq
+      - podman-docker
+      - podman
+      - python3-libselinux
+      - python3-pip
+    state: present
+
+# Selinux disable
+- name: Selinux | disabled
+  ansible.posix.selinux:
+    state: disabled
+
+# Python packages
+- name: Pip | docker
+  ansible.builtin.pip:
+    name:
+      - docker
+    state: present
+
+# Create /etc/docker
+- name: File | /etc/docker
+  ansible.builtin.file:
+    path: /etc/docker
+    state: directory
+    mode: "0644"
+
+# Docker configration
+- name: Copy | configuration files
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dst }}"
+    mode: "0644"
+  with_items:
+    - { src: etc/sysconfig/docker, dst: /etc/sysconfig/docker }
+    - { src: etc/docker/daemon.json, dst: /etc/docker/daemon.json }
+
+
+# Run service
+- name: Service | podman
+  ansible.builtin.systemd:
+    name: podman
+    state: started
+    enabled: true

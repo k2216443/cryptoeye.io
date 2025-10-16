@@ -7,3 +7,7 @@ module "codebuild" {
   telegram_bot_token = var.telegram_bot_token
   ETHERSCAN_API_KEY = var.ETHERSCAN_API_KEY
 }
+
+output "ecr_arn" {
+  value = module.codebuild.ecr_repository_arn
+}

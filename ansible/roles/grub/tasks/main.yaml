@@ -1,0 +1,36 @@
+---
+# This Ansible module performs tasks specific to the detected Linux distribution.
+# It first prints a debug message with the distribution's name and major version.
+# After that, it looks for and includes a task file based on the distribution's details.
+# The task file inclusion follows a specific search order:
+# 1. Distribution name with major version
+# 2. Distribution name with full version
+# 3. Distribution name with release name
+# 4. Distribution name only
+# 5. OS family name
+
+- name: "Debug ansible_distribution"
+  # This task prints a debug message showing the distribution name and major version.
+  ansible.legacy.debug:
+    msg: "{{ item }}"
+  with_items:
+    - "{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yaml"
+    - "{{ ansible_distribution | lower }}-{{ ansible_distribution_version }}.yaml"
+    - "{{ ansible_distribution | lower }}-{{ ansible_distribution_release }}.yaml"
+    - "{{ ansible_distribution | lower }}.yaml"
+    - "{{ ansible_os_family | lower }}.yaml"
+
+- name: "Include relevant task"
+  ansible.legacy.include_tasks:
+    file: "{{ subtask }}"
+  # This task includes the first found task file based on the distribution details.
+  # It uses a search order to find the most specific file first.
+  with_first_found:
+    - "{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yaml"
+    - "{{ ansible_distribution | lower }}-{{ ansible_distribution_version }}.yaml"
+    - "{{ ansible_distribution | lower }}-{{ ansible_distribution_release }}.yaml"
+    - "{{ ansible_distribution | lower }}.yaml"
+    - "{{ ansible_os_family | lower }}.yaml"
+  loop_control:
+    # Custom loop variable to store the found task filename.
+    loop_var: subtask

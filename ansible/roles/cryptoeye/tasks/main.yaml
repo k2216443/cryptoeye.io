@@ -1,0 +1,12 @@
+- include_tasks: "aws_ecr_login.yaml"
+
+- name: "Task:: ansible.builtin.docker_container: Deploing container: {{ cryptoeye_image }}"
+  ansible.builtin.docker_container:
+    name: cryptoeye
+    network_mode: host
+    image: "{{ cryptoeye_image }}"
+    restart_policy: always
+
+- name: "Task:: ansible.builtint.wait_for: waiting for port to be open 8000"
+  ansible.builtin.wait_for:
+    port: 8000

@@ -1,0 +1,5 @@
+---
+- name: Rebuild GRUB
+  ansible.builtin.command: grub2-mkconfig
+  tags:
+    - skip_ansible_lint

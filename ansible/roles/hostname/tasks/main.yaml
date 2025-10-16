@@ -1,0 +1,116 @@
+---
+# Ansible Playbook for System Configuration and Security
+#
+# This playbook performs a variety of tasks aimed at setting up and securing a Linux system.
+# It includes the installation of essential tools, hostname configuration, file permission settings,
+# and environment configuration. It ensures that tools like htop, vim, tmux, and sysstat are installed,
+# sets the hostname, enforces umask settings for security, adjusts PATH variables, and configures login definitions.
+#
+# Requirements:
+#   - Hosts should be accessible via Ansible.
+#   - Proper permissions to modify system files like /etc/hosts, /etc/sudoers, etc.
+#
+# Usage:
+#   ansible-playbook [playbook-name].yml
+
+- name: "Removing python3-urllib3 remove from packages"
+  ansible.builtin.dnf:
+    name:
+      - python3-urllib3
+    state: absent
+  notify:  python3-urllib3 remove
+
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: "Task:: ansible.builtin.package: htop, vim, tmux, sysstat, smartmontools, bc, bash-completion"
+  # Installs essential utility tools: htop, vim, tmux, and sysstat.
+  ansible.builtin.package:
+    name:
+      - htop
+      - vim
+      - tmux
+      - sysstat
+      - smartmontools
+      - bc
+      - bash-completion
+      - awscli-2
+
+- name: "Task:: ansible.builtin.pip: urllib3"
+  # Installs essential utility tools: htop, vim, tmux, and sysstat.
+  ansible.builtin.pip:
+    name:
+      - urllib3
+
+- name: "Task: ansible.builtin.hostname:: {{ inventory_hostname }}"
+  # Sets the hostname of the target machine to the inventory hostname.
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+    use: systemd
+
+- name: Check if /etc/bash.bashrc exists
+  ansible.builtin.stat:
+    path: /etc/bash.bashrc
+  register: bashrc
+
+- name: "Task: ansible.builtin.file"
+  ansible.builtin.file:
+    path: /etc/bash.bashrc
+    state: touch
+    mode: "0644"
+  when: not bashrc.stat.exists
+
+- name: "Task: ansible.builtin.lineinfile:: umask 027"
+  # Configures umask in /etc/bash.bashrc to restrict default file permissions.
+  ansible.builtin.lineinfile:
+    path: /etc/bash.bashrc
+    search_string: umask
+    line: umask 027
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: "Task: ansible.builtin.lineinfile: /etc/environment"
+  # Sets the system-wide PATH in /etc/environment.
+  ansible.builtin.lineinfile:
+    path: /etc/environment
+    search_string: PATH
+    line: PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: "Task: ansible.builtin.lineinfile:: umask 027"
+  # Sets umask in /etc/profile for secure default file creation permissions.
+  ansible.builtin.lineinfile:
+    path: /etc/profile
+    search_string: umask
+    line: umask 027
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: "Task: ansible.builtin.lineinfile:: /etc/login.defs"
+  # Configures various login definitions in /etc/login.defs.
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    search_string: "{{ item.name }}"
+    line: "{{ item.name }} {{ item.value }}"
+    owner: root
+    group: root
+    mode: "0644"
+  with_items:
+    - name: SHA_CRYPT_MIN_ROUNDS
+      value: "10000"
+    - name: UMASK
+      value: "027"
+
+- name: "Task:: ansible.builtin.lineinfile: /etc/hosts"
+  # Updates /etc/hosts with IP addresses and hostnames for all hosts in the inventory.
+  ansible.builtin.lineinfile:
+    dest: /etc/hosts
+    regexp: .*{{ item }}$
+    line: "{{ hostvars[item].hostname_ip }} {{ item }}"
+    state: present
+  with_items: "{{ groups['all'] }}"
+  when: hostname_enable

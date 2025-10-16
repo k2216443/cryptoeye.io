@@ -1,0 +1,42 @@
+# Base and only playbook to make a configuration on
+# all hosts.
+- hosts: cryptoeye-0
+  become: true
+  
+  # At current time not sure do we need it
+  gather_facts: yes
+
+  roles:
+
+    - name: "Grub configuration"
+      role: grub
+      tags:
+        - grub
+
+    - name: "Hostname configuration"
+      role: hostname
+      tags:
+        - hostname
+
+    - name: "NTP configuration"
+      role: ntp
+      tags:
+        - ntp
+
+    - name: "Amazon Web Services SSM agent"
+      role: amazon-ssm-agent
+      tags:
+        - ssm
+
+    - name: "Docker installation and configuration"
+      role: docker
+      vars:
+        docker_users:
+          - ec2-user
+      tags:
+        - docker
+
+    - name: "Cryptoeye installation and configuration"
+      role: cryptoeye
+      tags:
+        - cryptoeye

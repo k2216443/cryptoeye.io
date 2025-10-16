@@ -1,0 +1,87 @@
+---
+# Install packages
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/package_module.html
+- name: "Task:: ansible.builtin.package --> python"
+  ansible.builtin.package:
+
+    # List of package names to be installed. Ensure these packages are present on the system.
+    name:
+      - bash-completion
+      - jq
+      - moby-engine
+      - python3-libselinux
+      - python3-pip
+
+    # State of the packages. 'present' ensures the packages are installed.
+    state: present
+
+# Disable SELinux
+# https://docs.ansible.com/ansible/latest/collections/ansible/posix/selinux_module.html
+- name: "Task:: ansible.posix.selinux --> disabled"
+  ansible.posix.selinux:
+
+    # Desired SELinux state. 'disabled' will disable SELinux.
+    state: disabled
+
+# Install Python packages
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/pip_module.html
+- name: "Task:: ansible.builtin.pip --> docker"
+  ansible.builtin.pip:
+
+    # List of Python packages to be installed. Ensure these packages are present.
+    name:
+      - docker
+
+    # State of the Python packages. 'present' ensures the packages are installed.
+    state: present
+
+# Create /etc/docker directory
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/file_module.html
+- name: "Task:: ansible.builtin.file --> /etc/docker"
+  ansible.builtin.file:
+
+    # Path of the file or directory being managed. Ensures the directory exists.
+    path: /etc/docker
+
+    # State of the path. 'directory' ensures the path is a directory.
+    state: directory
+
+    # Permissions of the directory. '0644' sets the directory permissions.
+    mode: "0644"
+
+# Copy Docker configuration files
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/copy_module.html
+- name: "Task:: ansible.builtin.copy --> docker.service"
+  ansible.builtin.copy:
+
+    # Source file(s) to be copied. Iterates over the items in the list.
+    src: "{{ item }}"
+
+    # Destination path for the copied files.
+    dest: /{{ item }}
+
+    # Permissions for the copied files. '0644' sets the file permissions.
+    mode: "0644"
+
+  with_items:
+    - etc/sysconfig/docker
+    - etc/docker/daemon.json
+    - usr/lib/systemd/system/docker.service
+
+  # Notify handler to restart Docker service after copying files.
+  notify:
+    - "Task:: ansible.builtin.service --> restart docker"
+
+# Manage Docker service with systemd
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/systemd_module.html
+- name: "Task:: ansible.builtin.systemd --> docker"
+  ansible.builtin.systemd:
+
+    # Name of the systemd unit. Manages the 'docker' service.
+    name: docker
+
+    # Desired state of the service. 'started' ensures the service is running.
+    state: started
+
+    # Ensures the service is enabled at boot.
+    enabled: true

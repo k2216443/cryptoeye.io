@@ -1,0 +1,9 @@
+---
+# Restart Docker service
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/service_module.html
+- name: "Task:: ansible.builtin.service --> restart docker"
+  ansible.builtin.service:
+    # Name of the service. Manages the 'docker' service.
+    name: docker
+    # Desired state of the service. 'restarted' ensures the service is restarted.
+    state: restarted

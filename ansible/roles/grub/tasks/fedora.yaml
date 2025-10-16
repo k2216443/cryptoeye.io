@@ -1,0 +1,34 @@
+---
+# This Ansible module is responsible for managing kernel arguments in the GRUB configuration.
+# It first checks if each required kernel argument is present in the configuration.
+# If an argument is missing, it is added to the GRUB configuration individually.
+# After adding any missing arguments, it triggers a handler to rebuild the GRUB configuration.
+
+# Main tasks for the Ansible role
+
+- name: Check for each required kernel argument
+  ansible.builtin.command: grep "{{ item }}" /etc/default/grub
+  with_items: "{{ grub_required_kernel_args }}"
+  register: grub_args_check          # Register the results of the grep command for each argument.
+  changed_when: false                # This task does not make any changes, so 'changed' is always false.
+  failed_when: grub_args_check.rc != 0  # Fail the task if the grep command returns a non-zero exit code.
+  ignore_errors: true                 # Ignore errors to allow the next task to handle missing arguments.
+
+- name: Add missing kernel arguments individually
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX="(.*)"'  # Regular expression to find the 'GRUB_CMDLINE_LINUX' line.
+    line: 'GRUB_CMDLINE_LINUX="\1 {{ item.item }}"'  # New line to replace the matched line, appending the missing argument.
+    backrefs: true                     # Use backreferences to capture and use matched groups from the 'regexp'.
+  with_items: "{{ grub_args_check.results }}"  # Loop over the grep command results.
+  when: item.rc == 1                  # Only run this task for arguments that were not found.
+  notify: Rebuild GRUB  # Trigger the 'Rebuild GRUB' handler if any changes are made.
+
+- name: Ensure GRUB_TIMEOUT is set to 5
+  # This task ensures that the GRUB_TIMEOUT value in the GRUB configuration is set to 5.
+  # It uses the lineinfile module to search for the 'GRUB_TIMEOUT' line and sets the value to 5.
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_TIMEOUT='   # Regular expression to find the 'GRUB_TIMEOUT' line.
+    line: 'GRUB_TIMEOUT=5'     # New line to replace the matched line, setting the value to 5.
+  notify: Rebuild GRUB         # Trigger the 'Rebuild GRUB' handler if any changes are made.

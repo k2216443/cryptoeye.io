@@ -1,0 +1,7 @@
+---
+- name: "Restart: systemd-timesyncd"
+  ansible.builtin.systemd:
+    state: restarted
+    daemon_reload: true
+    name: systemd-timesyncd
+    enabled: true

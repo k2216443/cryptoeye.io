@@ -1,0 +1,5 @@
+---
+grub_required_kernel_args:
+  - ipv6.disable=1
+  - net.ifnames=0
+  - biosdevname=0

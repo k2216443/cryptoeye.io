@@ -1,0 +1,50 @@
+---
+# Install packages
+- name: Packages
+  ansible.builtin.package:
+    name:
+      - bash-completion
+      - jq
+      - moby-engine
+      - python3-libselinux
+      - python3-pip
+    state: present
+
+# Selinux disable
+- name: Selinux | disabled
+  ansible.posix.selinux:
+    state: disabled
+
+# Python packages
+- name: Pip | docker
+  ansible.builtin.pip:
+    name:
+      - docker
+    state: present
+
+# Create /etc/docker
+- name: File | /etc/docker
+  ansible.builtin.file:
+    path: /etc/docker
+    state: directory
+    mode: "0644"
+
+# Docker configration
+- name: Copy | configuration files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /{{ item }}
+    mode: "0644"
+  with_items:
+    - etc/sysconfig/docker
+    - etc/docker/daemon.json
+    - usr/lib/systemd/system/docker.service
+  notify:
+    - "Task:: ansible.builtin.service --> restart docker"
+
+# Run service
+- name: Service | docker
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+    enabled: true

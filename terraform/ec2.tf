@@ -38,7 +38,8 @@ module "ec2" {
       "proto" : "tcp",
       "port" : 22,
       "cidr_blocks" : [
-        "34.116.218.156/32"
+        "34.116.218.156/32",
+        "3.67.48.151/32"
       ]
     }
   ]
@@ -53,7 +54,10 @@ module "ec2" {
     {
       "Effect": "Allow",
       "Action": [
-        "ecr:DescribeImages"
+        "ecr:DescribeImages",
+        "ecr:GetAuthorizationToken",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:BatchGetImage"
       ],
       "Resource": "*"
     }

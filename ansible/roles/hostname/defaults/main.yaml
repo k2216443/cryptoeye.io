@@ -1,0 +1,2 @@
+hostname_ip: "{{ ansible_host }}"
+hostname_enable: false

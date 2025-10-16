@@ -1,0 +1,23 @@
+---
+# This task copies the `timesyncd.conf` configuration file from the local machine to the target machine.
+# The `ansible.builtin.copy` module is used to copy files and folders.
+# Setting the mode to "0644" ensures the file has the correct permissions for reading and writing.
+# Documentation: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/copy_module.html
+- name: "Task :: /etc/systemd/timesyncd.conf"
+  ansible.builtin.copy:
+    src: etc/systemd/timesyncd.conf   # Source file path on the control node.
+    dest: /etc/systemd/timesyncd.conf # Destination path on the target machine.
+    mode: "0644"                      # Sets the permissions of the copied file.
+  notify:
+    - "Restart: systemd-timesyncd"    # Notifies the handler to restart `systemd-timesyncd` if the file changes.
+
+# This task ensures the `systemd-timesyncd` service is started and enabled to start at boot.
+# The `ansible.builtin.systemd` module manages services, ensuring they are in the specified state.
+# Setting `daemon_reload` to true ensures the systemd manager configuration is reloaded if needed.
+# Documentation: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/systemd_module.html
+- name: "Task: ansible.builtin.systemd:: systemd-timesyncd"
+  ansible.builtin.systemd:
+    state: started           # Ensures the service is running.
+    daemon_reload: true      # Reloads the systemd daemon if necessary.
+    name: systemd-timesyncd  # Specifies the service name.
+    enabled: true            # Ensures the service is enabled to start at boot.
