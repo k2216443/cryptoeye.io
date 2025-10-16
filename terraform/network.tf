@@ -8,19 +8,25 @@ module "network" {
   name = "cryptoeye"
 
   # (Optional) Network Cidr
-  cidr = "192.168.0.0/24"
+  cidr = "172.16.0.0/16"
 }
 
-output "subnet" {
-  value = module.network.subnet
+output "subnet-public-0-id" {
+  value = module.network.subnet-public-0-id
+}
+output "subnet-public-0-name" {
+  value = module.network.subnet-public-0-name
+}
+
+output "subnet-public-1-id" {
+  value = module.network.subnet-public-1-id
+}
+output "subnet-public-1-name" {
+  value = module.network.subnet-public-1-name
 }
 
 output "vpc_id" {
   value = module.network.vpc_id
-}
-
-output "subnet_name" {
-  value = module.network.subnet_name
 }
 
 output "vpc_name" {

@@ -36,7 +36,7 @@
       tags:
         - docker
 
-    - name: "Cryptoeye installation and configuration"
-      role: cryptoeye
+    - name: "Chaineye installation and configuration"
+      role: chaineye
       tags:
-        - cryptoeye
+        - chaineye

@@ -34,6 +34,15 @@ def redact_headers(hdrs):
         out[lk] = "***" if lk in SENSITIVE else v
     return out
 
+
+@app.get("/health")
+async def evaluate(request: Request) -> JSONResponse:
+    return JSONResponse(
+        status_code=200,
+        content={"ok": True}
+    )
+
+
 @app.get("/evaluate")
 async def evaluate(request: Request, addr: str = Query(..., description="Ethereum address 0x...")) -> JSONResponse:
 

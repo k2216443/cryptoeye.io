@@ -8,7 +8,7 @@
     image: "{{ cryptoeye_image }}"
     restart_policy: always
     env:
-      ETHERSCAN_API_KEY: "{{ cryptoeye_etherscan_api_key }}"
+      ETHERSCAN_API_KEY: "{{ chaineye_etherscan_api_key }}"
       LOG_DEBUG: "on"
 
 # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/wait_for_module.html

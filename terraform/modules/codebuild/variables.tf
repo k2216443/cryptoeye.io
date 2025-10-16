@@ -31,11 +31,11 @@ variable "telegram_bot_token" {
 }
 
 variable "image" {
-  type = string
+  type    = string
   default = "aws/codebuild/standard:7.0"
 }
 
 variable "type" {
-  type = string
+  type    = string
   default = "LINUX_CONTAINER"
 }

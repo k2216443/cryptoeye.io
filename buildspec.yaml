@@ -8,6 +8,7 @@ phases:
       - IMAGE_TAG=$(cat version)-$(git describe --always --long)
   build:
     commands:
+      - cd src/api
       - echo Building image 292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:$IMAGE_TAG
       - docker build -t 292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:${IMAGE_TAG}  .
   post_build:

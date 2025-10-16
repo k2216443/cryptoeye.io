@@ -18,7 +18,7 @@ module "ec2" {
 
   # The identifier or name tag of the subnet within the VPC where the instance will be deployed.
   # This is the first subnet within the 'sandbox' VPC.
-  subnet = module.network.subnet_name
+  subnet = module.network.subnet-public-0-name
 
   # The descriptive name for the instance, indicating its purpose or application.
   # In this case, the instance is likely running the Jenkins continuous integration server.
@@ -41,11 +41,18 @@ module "ec2" {
         "34.116.218.156/32",
         "3.67.48.151/32"
       ]
+    },
+    {
+      "proto" : "tcp",
+      "port" : 8080,
+      "cidr_blocks" : [
+        "0.0.0.0/0"
+      ]
     }
   ]
 
-  disk_size = 10
-  private_ip = "192.168.0.10"
+  disk_size  = 10
+  private_ip = "172.16.0.10"
 
   policy = <<EOF
 {
@@ -65,4 +72,8 @@ EOF
 
 output "public_ip" {
   value = module.ec2.public_ip
+}
+
+output "instance-id" {
+  value = module.ec2.instance-id
 }

@@ -11,3 +11,4 @@ variable "ETHERSCAN_API_KEY" {
 variable "telegram_bot_token" {
   type = string
 }
+

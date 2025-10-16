@@ -58,7 +58,7 @@ resource "aws_instance" "instance" {
   # See: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#tags
   tags = {
     "Name" : "${var.name}",
-    "Module": "ec2"
+    "Module" : "ec2"
   }
 }
 
@@ -68,4 +68,8 @@ output "private_ip" {
 
 output "public_ip" {
   value = aws_instance.instance.public_ip
+}
+
+output "instance-id" {
+  value = aws_instance.instance.id
 }
