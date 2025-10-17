@@ -31,27 +31,47 @@ phases:
           echo "✅ Build succeeded - Pushing images to ECR..."
           docker push ${IMAGE_REPO_URI}:${IMAGE_TAG}
           docker push ${STATIC_SITE_REPO_URI}:${IMAGE_TAG}
+          MSG=$(cat <<EOF
+        🚀 <b>ChainEye Deployment</b>
 
-          MSG="🚀 <b>ChainEye Deployment</b>%0A%0A✅ Build successful!%0A%0A<b>Version:</b> <code>${IMAGE_TAG}</code>%0A<b>Commit:</b> ${COMMIT_MSG}%0A<b>Author:</b> ${GIT_AUTHOR}%0A%0A<b>Images:</b>%0A• API: <code>${IMAGE_REPO_URI##*/}:${IMAGE_TAG}</code>%0A• Static Site: <code>${STATIC_SITE_REPO_URI##*/}:${IMAGE_TAG}</code>%0A%0A<a href='${BUILD_URL}'>View Build Details</a>"
+        ✅ Build successful!
 
+        <b>Version:</b> <code>${IMAGE_TAG}</code>
+        <b>Commit:</b> ${COMMIT_MSG}
+        <b>Author:</b> ${GIT_AUTHOR}
+
+        <b>Images:</b>
+        • API: <code>${IMAGE_REPO_URI##*/}:${IMAGE_TAG}</code>
+        • Static Site: <code>${STATIC_SITE_REPO_URI##*/}:${IMAGE_TAG}</code>
+
+        <a href='${BUILD_URL}'>View Build Details</a>
+        EOF
+          )
           curl -sS -X POST "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${TG_CHAT_ID}" \
             --data-urlencode "text=${MSG}" \
             --data-urlencode "parse_mode=HTML" \
             --data-urlencode "disable_web_page_preview=false"
-
           echo "{\"api\":\"${IMAGE_REPO_URI}:${IMAGE_TAG}\",\"static_site\":\"${STATIC_SITE_REPO_URI}:${IMAGE_TAG}\"}" > image-detail.json
         else
           echo "❌ Build failed - Sending failure notification..."
+          MSG=$(cat <<EOF
+        🔴 <b>ChainEye Build Failed</b>
 
-          MSG="🔴 <b>ChainEye Build Failed</b>%0A%0A❌ Build failed during ${CODEBUILD_BUILD_PHASE}%0A%0A<b>Version:</b> <code>${IMAGE_TAG}</code>%0A<b>Commit:</b> ${COMMIT_MSG}%0A<b>Author:</b> ${GIT_AUTHOR}%0A%0A<a href='${BUILD_URL}'>View Build Logs</a>"
+        ❌ Build failed during ${CODEBUILD_BUILD_PHASE}
 
+        <b>Version:</b> <code>${IMAGE_TAG}</code>
+        <b>Commit:</b> ${COMMIT_MSG}
+        <b>Author:</b> ${GIT_AUTHOR}
+
+        <a href='${BUILD_URL}'>View Build Logs</a>
+        EOF
+          )
           curl -sS -X POST "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${TG_CHAT_ID}" \
             --data-urlencode "text=${MSG}" \
             --data-urlencode "parse_mode=HTML" \
             --data-urlencode "disable_web_page_preview=false"
-
           exit 1
         fi
 
