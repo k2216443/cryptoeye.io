@@ -8,11 +8,12 @@ from typing import Any, Dict, Optional
 from contextlib import asynccontextmanager
 from functools import partial
 
-
 from fastapi import FastAPI, Query, Request
 from fastapi.responses import JSONResponse
 
 from providers.etherscan import Etherscan
+from libs.tg import TelegramBot
+
 from pythonjsonlogger import jsonlogger
 
 ADDR_RE = re.compile(r"^0x[a-fA-F0-9]{40}$")
@@ -21,12 +22,10 @@ ADDR_RE = re.compile(r"^0x[a-fA-F0-9]{40}$")
 def get_request_id(request: Request) -> Optional[str]:
     return request.headers.get("x-request-id") or request.headers.get("x-correlation-id")
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.state.scanner = Etherscan()
     yield
-
 
 def setup_logging() -> logging.Logger:
     level = os.getenv("LOG_LEVEL", "INFO").upper()
@@ -55,7 +54,6 @@ def setup_logging() -> logging.Logger:
     root.handlers = [sh, fh]
     root.setLevel(level)
 
-
     # align uvicorn loggers
     for name in ("uvicorn", "uvicorn.error", "uvicorn.access"):
         lg = logging.getLogger(name)
@@ -71,7 +69,6 @@ def setup_logging() -> logging.Logger:
 
 log = setup_logging()
 app = FastAPI(title="Wallet Security Evaluator", lifespan=lifespan)
-
 
 def is_valid_eth_address(addr: str) -> bool:
     return bool(ADDR_RE.fullmatch(addr))
@@ -124,17 +121,27 @@ async def trace(request: Request) -> JSONResponse:
 
     # message kept short; details ride in extra fields for JSON logger
     log.info("trace", extra={**payload, "request_id": req_id})
-    return JSONResponse(status_code=200, content={"ok": True})
+
+    addr = body_json["text"]
+    if not is_valid_eth_address(addr):
+        return JSONResponse(
+            status_code=400,
+            content={"ok": False, "error": "invalid address format, expected 0x + 40 hex chars"},
+        )
+
+
+    etherscan = Etherscan()
+    tg = TelegramBot(bot_token=os.getenv("BOT_TOKEN"))
+    security = etherscan.evaluate_address_security(address=addr)
+    tg.send_message(chat_id=body_json["chat"]["id"], text=security)
+
+    
+    # return JSONResponse(status_code=200, content={"ok": True})
 
 
 @app.get("/evaluate")
 async def evaluate(request: Request, addr: str = Query(..., description="Ethereum address 0x...")) -> JSONResponse:
 
-    print(json.dumps({
-        "event": "evaluate_start",
-        "addr": addr,
-        "headers": redact_headers(request.headers)
-    }))
         
     if not is_valid_eth_address(addr):
         return JSONResponse(

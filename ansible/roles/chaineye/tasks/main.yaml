@@ -13,12 +13,12 @@
 # https://docs.ansible.com/ansible/latest/collections/community/docker/docker_container_module.html
 - name: "Task:: ansible.builtin.docker_container: Deploing container: {{ cryptoeye_image }}"
   ansible.builtin.docker_container:
-    name: cryptoeye
+    name: chaineye
     network_mode: host
-    image: "{{ cryptoeye_image }}"
+    image: "{{ chaineye_image }}"
     restart_policy: always
     volumes:
-      - "/data/chaineye/logs:/var/logs"
+      - "/data/chaineye/logs:/var/log:rw"
     env:
       ETHERSCAN_API_KEY: "{{ chaineye_etherscan_api_key }}"
       LOG_DEBUG: "on"
