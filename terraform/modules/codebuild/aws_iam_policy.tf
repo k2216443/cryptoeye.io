@@ -45,6 +45,7 @@ resource "aws_iam_policy" "codebuild" {
           Resource = [
             "arn:aws:ecr:us-west-2:292875404443:repository/python",
             "arn:aws:ecr:us-west-2:292875404443:repository/cryptoeye",
+            "arn:aws:ecr:us-west-2:292875404443:repository/chaineye-site",
           ]
           Sid = "ECRPush"
         },
