@@ -4,22 +4,56 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-      - aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye
+      - aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${IMAGE_REPO_URI}
+      - aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${STATIC_SITE_REPO_URI}
       - IMAGE_TAG=$(cat version)-$(git describe --always --long)
-  build:
-    commands:
-      - cd src/api
-      - echo Building image 292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:$IMAGE_TAG
-      - docker build -t 292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:${IMAGE_TAG}  .
-  post_build:
-    commands:
-      - echo Pushing to ECR...
-      - docker push 292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:${IMAGE_TAG} 
       - TG_TOKEN=$(aws ssm get-parameter --name "/cryptoeye/telegram_bot_token" --with-decryption --query Parameter.Value --output text)
       - TG_CHAT_ID=$(aws ssm get-parameter --name "/cryptoeye/telegram_chat_id" --query Parameter.Value --output text)
-      - MSG="292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:${IMAGE_TAG}"
-      - curl -sS -X POST "https://api.telegram.org/bot${TG_TOKEN}/sendMessage"  --data-urlencode "chat_id=${TG_CHAT_ID}" --data-urlencode "text=${MSG}" --data-urlencode "disable_web_page_preview=true"
-      - echo "292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:${IMAGE_TAG}" > image-detail.json
+      - COMMIT_MSG=$(git log -1 --pretty=%B | head -n 1)
+      - GIT_AUTHOR=$(git log -1 --pretty=format:'%an')
+      - BUILD_URL="https://console.aws.amazon.com/codesuite/codebuild/projects/${CODEBUILD_BUILD_ID%%:*}/build/${CODEBUILD_BUILD_ID}/"
+    on-failure: ABORT
+  build:
+    commands:
+      - echo Building API image ${IMAGE_REPO_URI}:$IMAGE_TAG
+      - cd src/api
+      - docker build -t ${IMAGE_REPO_URI}:${IMAGE_TAG} .
+      - cd ../..
+      - echo Building static site image ${STATIC_SITE_REPO_URI}:$IMAGE_TAG
+      - cd src/static
+      - docker build -t ${STATIC_SITE_REPO_URI}:${IMAGE_TAG} .
+      - cd ../..
+    on-failure: ABORT
+  post_build:
+    commands:
+      - |
+        if [ "$CODEBUILD_BUILD_SUCCEEDING" = "1" ]; then
+          echo "✅ Build succeeded - Pushing images to ECR..."
+          docker push ${IMAGE_REPO_URI}:${IMAGE_TAG}
+          docker push ${STATIC_SITE_REPO_URI}:${IMAGE_TAG}
+
+          MSG="🚀 <b>ChainEye Deployment</b>%0A%0A✅ Build successful!%0A%0A<b>Version:</b> <code>${IMAGE_TAG}</code>%0A<b>Commit:</b> ${COMMIT_MSG}%0A<b>Author:</b> ${GIT_AUTHOR}%0A%0A<b>Images:</b>%0A• API: <code>${IMAGE_REPO_URI##*/}:${IMAGE_TAG}</code>%0A• Static Site: <code>${STATIC_SITE_REPO_URI##*/}:${IMAGE_TAG}</code>%0A%0A<a href='${BUILD_URL}'>View Build Details</a>"
+
+          curl -sS -X POST "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TG_CHAT_ID}" \
+            --data-urlencode "text=${MSG}" \
+            --data-urlencode "parse_mode=HTML" \
+            --data-urlencode "disable_web_page_preview=false"
+
+          echo "{\"api\":\"${IMAGE_REPO_URI}:${IMAGE_TAG}\",\"static_site\":\"${STATIC_SITE_REPO_URI}:${IMAGE_TAG}\"}" > image-detail.json
+        else
+          echo "❌ Build failed - Sending failure notification..."
+
+          MSG="🔴 <b>ChainEye Build Failed</b>%0A%0A❌ Build failed during ${CODEBUILD_BUILD_PHASE}%0A%0A<b>Version:</b> <code>${IMAGE_TAG}</code>%0A<b>Commit:</b> ${COMMIT_MSG}%0A<b>Author:</b> ${GIT_AUTHOR}%0A%0A<a href='${BUILD_URL}'>View Build Logs</a>"
+
+          curl -sS -X POST "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TG_CHAT_ID}" \
+            --data-urlencode "text=${MSG}" \
+            --data-urlencode "parse_mode=HTML" \
+            --data-urlencode "disable_web_page_preview=false"
+
+          exit 1
+        fi
 
 artifacts:
   files:

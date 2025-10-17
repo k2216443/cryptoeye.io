@@ -25,6 +25,11 @@ resource "aws_codebuild_project" "build" {
       name  = "IMAGE_REPO_URI"
       value = aws_ecr_repository.app.repository_url
     }
+
+    environment_variable {
+      name  = "STATIC_SITE_REPO_URI"
+      value = aws_ecr_repository.static_site.repository_url
+    }
   }
 
   logs_config {
