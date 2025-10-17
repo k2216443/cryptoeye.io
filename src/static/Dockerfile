@@ -7,7 +7,7 @@ COPY nginx.conf /etc/nginx/nginx.conf
 COPY *.html /usr/share/nginx/html/
 COPY *.jpg /usr/share/nginx/html/
 
-# Expose port 8000
+# Expose port 80
 EXPOSE 8000
 
 # Start nginx
