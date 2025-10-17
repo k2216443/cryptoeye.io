@@ -4,3 +4,4 @@ pytest
 requests
 uvicorn
 anyio
+python-json-logger
