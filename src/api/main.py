@@ -122,18 +122,19 @@ async def trace(request: Request) -> JSONResponse:
     # message kept short; details ride in extra fields for JSON logger
     log.info("trace", extra={**payload, "request_id": req_id})
 
-    addr = body_json["text"]
+    addr = body_json["message"]["text"]
     if not is_valid_eth_address(addr):
-        return JSONResponse(
-            status_code=400,
-            content={"ok": False, "error": "invalid address format, expected 0x + 40 hex chars"},
-        )
+
+
+        tg = TelegramBot(bot_token=os.getenv("BOT_TOKEN"))
+        tg.send_message(chat_id=body_json["message"]["chat"]["id"], text="invalid address format, expected 0x + 40 hex chars")
+        return
 
 
     etherscan = Etherscan()
     tg = TelegramBot(bot_token=os.getenv("BOT_TOKEN"))
     security = etherscan.evaluate_address_security(address=addr)
-    tg.send_message(chat_id=body_json["chat"]["id"], text=security)
+    tg.send_message(chat_id=body_json["message"]["chat"]["id"], text=security)
 
     
     # return JSONResponse(status_code=200, content={"ok": True})
