@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Wallet security evaluation results">
+    <meta name="theme-color" content="#4F46E5">
+
+    <!-- PWA Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ChainEye">
+
+    <title>Security Report - ChainEye</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            color: #4F46E5;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .back-button:hover {
+            text-decoration: underline;
+        }
+
+        .wallet-info {
+            margin-top: 20px;
+        }
+
+        .wallet-address {
+            font-family: monospace;
+            font-size: 16px;
+            color: #374151;
+            word-break: break-all;
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .chain-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #4F46E5;
+            color: white;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+
+        .chain-badge.tron {
+            background: #ef4444;
+        }
+
+        .loading-state {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 30px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #4F46E5;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+        .security-report {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .security-report.show {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .risk-score {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: bold;
+            border: 8px solid;
+        }
+
+        .score-circle.low {
+            border-color: #10b981;
+            color: #10b981;
+            background: #d1fae5;
+        }
+
+        .score-circle.medium {
+            border-color: #f59e0b;
+            color: #f59e0b;
+            background: #fef3c7;
+        }
+
+        .score-circle.high {
+            border-color: #ef4444;
+            color: #ef4444;
+            background: #fee2e2;
+        }
+
+        .risk-label {
+            font-size: 24px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .details-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .details-section h2 {
+            font-size: 20px;
+            color: #1f2937;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            padding: 16px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .detail-value {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .flag-item {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .flag-item.critical {
+            background: #fee2e2;
+            border-left-color: #ef4444;
+        }
+
+        .flag-item.safe {
+            background: #d1fae5;
+            border-left-color: #10b981;
+        }
+
+        .error-state {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .error-state.show {
+            display: block;
+        }
+
+        .error-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+
+        .retry-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #4F46E5;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .retry-button:hover {
+            background: #4338ca;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header, .risk-score, .details-section {
+                padding: 20px;
+            }
+
+            .score-circle {
+                width: 120px;
+                height: 120px;
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loadingState" class="loading-state">
+            <div class="spinner"></div>
+            <div class="loading-text">Analyzing wallet security...</div>
+        </div>
+
+        <div id="errorState" class="error-state">
+            <div class="error-icon">⚠️</div>
+            <h2>Unable to Load Security Report</h2>
+            <p class="error-message" id="errorMessage">Something went wrong. Please try again.</p>
+            <a href="/" class="retry-button">← Back to Search</a>
+        </div>
+
+        <div id="securityReport" class="security-report">
+            <div class="header">
+                <a href="/" class="back-button">← Back to Search</a>
+                <h1>Security Report</h1>
+                <div class="wallet-info">
+                    <div class="detail-label">Wallet Address:</div>
+                    <div class="wallet-address" id="walletAddress"></div>
+                    <span class="chain-badge" id="chainBadge"></span>
+                </div>
+            </div>
+
+            <div class="risk-score">
+                <h2>Overall Risk Score</h2>
+                <div class="score-circle" id="scoreCircle">
+                    <span id="scoreValue">-</span>
+                </div>
+                <div class="risk-label" id="riskLabel">Analyzing...</div>
+            </div>
+
+            <div class="details-section">
+                <h2>Security Indicators</h2>
+                <div id="securityIndicators"></div>
+            </div>
+
+            <div class="details-section">
+                <h2>Wallet Details</h2>
+                <div id="walletDetails"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Parse URL to get wallet address and chain
+        const pathParts = window.location.pathname.split('/');
+        const walletAddress = pathParts[pathParts.length - 1];
+        const urlParams = new URLSearchParams(window.location.search);
+        const chain = urlParams.get('chain') || 'ethereum';
+
+        // Update UI with wallet info
+        document.getElementById('walletAddress').textContent = walletAddress;
+        const chainBadge = document.getElementById('chainBadge');
+        chainBadge.textContent = chain.toUpperCase();
+        if (chain === 'tron') {
+            chainBadge.classList.add('tron');
+        }
+
+        // Fetch security data from API
+        async function fetchSecurityData() {
+            try {
+                const response = await fetch(`/api/evaluate?addr=${walletAddress}&chain=${chain}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                displaySecurityData(data);
+
+            } catch (error) {
+                console.error('Error fetching security data:', error);
+                showError(error.message);
+            }
+        }
+
+        // Display security data
+        function displaySecurityData(data) {
+            // Hide loading, show report
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('securityReport').classList.add('show');
+
+            // Update risk score
+            const riskScore = data.risk_score || 0;
+            const riskLevel = getRiskLevel(riskScore);
+
+            document.getElementById('scoreValue').textContent = riskScore;
+            document.getElementById('scoreCircle').className = `score-circle ${riskLevel}`;
+            document.getElementById('riskLabel').textContent = `${riskLevel.toUpperCase()} RISK`;
+
+            // Display security indicators
+            const indicators = document.getElementById('securityIndicators');
+            indicators.innerHTML = '';
+
+            if (data.flags && data.flags.length > 0) {
+                data.flags.forEach(flag => {
+                    const flagDiv = document.createElement('div');
+                    flagDiv.className = `flag-item ${flag.severity || ''}`;
+                    flagDiv.innerHTML = `
+                        <strong>${flag.title || 'Security Flag'}</strong><br>
+                        ${flag.description || ''}
+                    `;
+                    indicators.appendChild(flagDiv);
+                });
+            } else {
+                indicators.innerHTML = '<div class="flag-item safe">No security concerns detected</div>';
+            }
+
+            // Display wallet details
+            const details = document.getElementById('walletDetails');
+            details.innerHTML = '';
+
+            const detailItems = [
+                { label: 'Total Transactions', value: data.tx_count || 'N/A' },
+                { label: 'First Transaction', value: data.first_tx_date || 'N/A' },
+                { label: 'Last Transaction', value: data.last_tx_date || 'N/A' },
+                { label: 'Balance', value: data.balance || 'N/A' },
+                { label: 'Contract Interactions', value: data.contract_interactions || 'N/A' },
+            ];
+
+            detailItems.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'detail-item';
+                itemDiv.innerHTML = `
+                    <div class="detail-label">${item.label}</div>
+                    <div class="detail-value">${item.value}</div>
+                `;
+                details.appendChild(itemDiv);
+            });
+        }
+
+        // Determine risk level from score
+        function getRiskLevel(score) {
+            if (score < 30) return 'low';
+            if (score < 70) return 'medium';
+            return 'high';
+        }
+
+        // Show error state
+        function showError(message) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').classList.add('show');
+            document.getElementById('errorMessage').textContent = message || 'Unable to fetch security data.';
+        }
+
+        // Check if wallet address is valid
+        if (!walletAddress || walletAddress === 'evaluate.html') {
+            showError('No wallet address provided');
+        } else {
+            // Fetch data on load
+            fetchSecurityData();
+        }
+
+        // Handle back navigation from mobile apps
+        window.addEventListener('popstate', function(event) {
+            window.location.href = '/';
+        });
+    </script>
+</body>
+</html>

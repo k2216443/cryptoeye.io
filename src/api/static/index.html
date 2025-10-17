@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Evaluate wallet security for ERC20 and TRC20 addresses">
+    <meta name="theme-color" content="#4F46E5">
+
+    <!-- PWA Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ChainEye">
+
+    <title>ChainEye - Wallet Security Evaluator</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #1f2937;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px 30px;
+            max-width: 500px;
+            width: 100%;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            font-size: 32px;
+            color: #4F46E5;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .logo p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #374151;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: monospace;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #4F46E5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        input.error {
+            border-color: #ef4444;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .chain-type {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .chain-badge {
+            padding: 4px 12px;
+            background: #f3f4f6;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .chain-badge.active {
+            background: #4F46E5;
+            color: white;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: #4F46E5;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .info {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #1e40af;
+        }
+
+        .examples {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .examples h3 {
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .example-address {
+            font-family: monospace;
+            font-size: 12px;
+            color: #6b7280;
+            background: #f9fafb;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .example-address:hover {
+            background: #f3f4f6;
+            color: #4F46E5;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            .logo h1 {
+                font-size: 28px;
+            }
+
+            input, button {
+                font-size: 14px;
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #4F46E5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>🔍 ChainEye</h1>
+            <p>Wallet Security Evaluator</p>
+        </div>
+
+        <form id="evaluateForm">
+            <div class="input-group">
+                <label for="walletAddress">Enter Wallet Address</label>
+                <input
+                    type="text"
+                    id="walletAddress"
+                    name="walletAddress"
+                    placeholder="0x... or T..."
+                    autocomplete="off"
+                    spellcheck="false"
+                >
+                <div class="chain-type">
+                    <span>Detected:</span>
+                    <span class="chain-badge" id="chainType">-</span>
+                </div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+
+            <button type="submit" id="submitBtn">Evaluate Security</button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+        </div>
+
+        <div class="info">
+            <strong>Supported Networks:</strong><br>
+            • Ethereum (ERC20) - 0x...<br>
+            • Tron (TRC20) - T...
+        </div>
+
+        <div class="examples">
+            <h3>Try an example:</h3>
+            <div class="example-address" data-address="0x4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f91">
+                ETH: 0x4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f91
+            </div>
+            <div class="example-address" data-address="TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7">
+                TRC: TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('evaluateForm');
+        const input = document.getElementById('walletAddress');
+        const errorMessage = document.getElementById('errorMessage');
+        const chainType = document.getElementById('chainType');
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loading');
+
+        // Address validation patterns
+        const ETH_PATTERN = /^0x[a-fA-F0-9]{40}$/;
+        const TRC_PATTERN = /^T[a-zA-Z0-9]{33}$/;
+
+        // Detect chain type
+        function detectChain(address) {
+            if (ETH_PATTERN.test(address)) {
+                return 'ethereum';
+            } else if (TRC_PATTERN.test(address)) {
+                return 'tron';
+            }
+            return null;
+        }
+
+        // Validate address
+        function validateAddress(address) {
+            if (!address || address.trim() === '') {
+                return { valid: false, error: 'Please enter a wallet address' };
+            }
+
+            const chain = detectChain(address);
+
+            if (chain === 'ethereum') {
+                return { valid: true, chain: 'ethereum' };
+            } else if (chain === 'tron') {
+                return { valid: true, chain: 'tron' };
+            } else {
+                return {
+                    valid: false,
+                    error: 'Invalid address format. Expected 0x... (42 chars) or T... (34 chars)'
+                };
+            }
+        }
+
+        // Update UI based on input
+        input.addEventListener('input', function() {
+            const address = this.value.trim();
+
+            if (address === '') {
+                chainType.textContent = '-';
+                chainType.className = 'chain-badge';
+                input.classList.remove('error');
+                errorMessage.classList.remove('show');
+                return;
+            }
+
+            const validation = validateAddress(address);
+
+            if (validation.valid) {
+                chainType.textContent = validation.chain.toUpperCase();
+                chainType.className = 'chain-badge active';
+                input.classList.remove('error');
+                errorMessage.classList.remove('show');
+            } else {
+                chainType.textContent = 'Invalid';
+                chainType.className = 'chain-badge';
+                input.classList.add('error');
+                errorMessage.textContent = validation.error;
+                errorMessage.classList.add('show');
+            }
+        });
+
+        // Handle form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const address = input.value.trim();
+            const validation = validateAddress(address);
+
+            if (!validation.valid) {
+                input.classList.add('error');
+                errorMessage.textContent = validation.error;
+                errorMessage.classList.add('show');
+                return;
+            }
+
+            // Show loading state
+            loading.classList.add('show');
+            submitBtn.disabled = true;
+
+            // Redirect to evaluate page with chain type
+            window.location.href = `/evaluate/${address}?chain=${validation.chain}`;
+        });
+
+        // Example address click handlers
+        document.querySelectorAll('.example-address').forEach(el => {
+            el.addEventListener('click', function() {
+                const address = this.getAttribute('data-address');
+                input.value = address;
+                input.dispatchEvent(new Event('input'));
+            });
+        });
+
+        // Handle deep links (if opened from mobile app)
+        window.addEventListener('load', function() {
+            const params = new URLSearchParams(window.location.search);
+            const address = params.get('address');
+            if (address) {
+                input.value = address;
+                input.dispatchEvent(new Event('input'));
+            }
+        });
+    </script>
+</body>
+</html>

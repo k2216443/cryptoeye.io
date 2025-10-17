@@ -1,7 +1,7 @@
 resource "aws_security_group" "alb" {
   name        = "alb-https"
   description = "Allow HTTPS in"
-  vpc_id      = module.network.vpc_id
+  vpc_id      = var.vpc_id
 
   ingress {
     protocol    = "tcp"

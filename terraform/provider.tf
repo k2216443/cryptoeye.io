@@ -14,3 +14,25 @@ provider "aws" {
   profile = "cryptoeye"
 }
 
+# --- Terraform Backend Configuration ---
+
+# The backend block configures where Terraform's state files will be stored.
+# State files track the configurations deployed, so it's crucial to keep them consistent and safe.
+# Here, the state file is stored in an AWS S3 bucket.
+terraform {
+  backend "s3" {
+
+    # Name of the S3 bucket where the Terraform state file will be stored.
+    bucket = "chaineye-terraform-state"
+
+    # Path inside the S3 bucket where the state file will reside.
+    # Organizing state files by environment or function can make managing multiple state files easier.
+    key = "chaineye.tfstate"
+
+    # AWS region where the S3 bucket is located.
+    region = "us-west-2"
+
+    # AWS credentials profile
+    profile = "cryptoeye"
+  }
+}
