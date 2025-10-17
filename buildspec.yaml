@@ -29,30 +29,78 @@ phases:
       - |
         if [ "$CODEBUILD_BUILD_SUCCEEDING" = "1" ]; then
           echo "✅ Build succeeded - Pushing images to ECR..."
-          docker push ${IMAGE_REPO_URI}:${IMAGE_TAG}
-          docker push ${STATIC_SITE_REPO_URI}:${IMAGE_TAG}
-          MSG=$(cat <<EOF
+
+          # Push API image
+          echo "Pushing API image..."
+          if docker push ${IMAGE_REPO_URI}:${IMAGE_TAG}; then
+            API_PUSH_STATUS="✅"
+            API_PUSH_RESULT="success"
+          else
+            API_PUSH_STATUS="❌"
+            API_PUSH_RESULT="failed"
+          fi
+
+          # Push Static Site image
+          echo "Pushing Static Site image..."
+          if docker push ${STATIC_SITE_REPO_URI}:${IMAGE_TAG}; then
+            STATIC_PUSH_STATUS="✅"
+            STATIC_PUSH_RESULT="success"
+          else
+            STATIC_PUSH_STATUS="❌"
+            STATIC_PUSH_RESULT="failed"
+          fi
+
+          # Check if both pushes succeeded
+          if [ "$API_PUSH_RESULT" = "success" ] && [ "$STATIC_PUSH_RESULT" = "success" ]; then
+            echo "✅ All images pushed successfully"
+            MSG=$(cat <<EOF
         🚀 <b>ChainEye Deployment</b>
 
-        ✅ Build successful!
+        ✅ Build and deployment successful!
 
         <b>Version:</b> <code>${IMAGE_TAG}</code>
         <b>Commit:</b> ${COMMIT_MSG}
         <b>Author:</b> ${GIT_AUTHOR}
 
         <b>Images:</b>
-        • API: <code>${IMAGE_REPO_URI##*/}:${IMAGE_TAG}</code>
-        • Static Site: <code>${STATIC_SITE_REPO_URI##*/}:${IMAGE_TAG}</code>
+        • API: <code>${IMAGE_REPO_URI##*/}:${IMAGE_TAG}</code> ${API_PUSH_STATUS}
+        • Static Site: <code>${STATIC_SITE_REPO_URI##*/}:${IMAGE_TAG}</code> ${STATIC_PUSH_STATUS}
 
         <a href='${BUILD_URL}'>View Build Details</a>
         EOF
-          )
-          curl -sS -X POST "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
-            --data-urlencode "chat_id=${TG_CHAT_ID}" \
-            --data-urlencode "text=${MSG}" \
-            --data-urlencode "parse_mode=HTML" \
-            --data-urlencode "disable_web_page_preview=false"
-          echo "{\"api\":\"${IMAGE_REPO_URI}:${IMAGE_TAG}\",\"static_site\":\"${STATIC_SITE_REPO_URI}:${IMAGE_TAG}\"}" > image-detail.json
+            )
+            curl -sS -X POST "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
+              --data-urlencode "chat_id=${TG_CHAT_ID}" \
+              --data-urlencode "text=${MSG}" \
+              --data-urlencode "parse_mode=HTML" \
+              --data-urlencode "disable_web_page_preview=false"
+            echo "{\"api\":\"${IMAGE_REPO_URI}:${IMAGE_TAG}\",\"static_site\":\"${STATIC_SITE_REPO_URI}:${IMAGE_TAG}\",\"status\":\"success\"}" > image-detail.json
+          else
+            echo "❌ Push failed for one or more images"
+            MSG=$(cat <<EOF
+        🔴 <b>ChainEye Push Failed</b>
+
+        ❌ Failed to push images to ECR
+
+        <b>Version:</b> <code>${IMAGE_TAG}</code>
+        <b>Commit:</b> ${COMMIT_MSG}
+        <b>Author:</b> ${GIT_AUTHOR}
+
+        <b>Push Status:</b>
+        • API: ${API_PUSH_STATUS} ${API_PUSH_RESULT}
+        • Static Site: ${STATIC_PUSH_STATUS} ${STATIC_PUSH_RESULT}
+
+        <a href='${BUILD_URL}'>View Build Logs</a>
+        EOF
+            )
+            curl -sS -X POST "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
+              --data-urlencode "chat_id=${TG_CHAT_ID}" \
+              --data-urlencode "text=${MSG}" \
+              --data-urlencode "parse_mode=HTML" \
+              --data-urlencode "disable_web_page_preview=false"
+            echo "{\"status\":\"push_failed\",\"api_push\":\"${API_PUSH_RESULT}\",\"static_push\":\"${STATIC_PUSH_RESULT}\"}" > image-detail.json
+            exit 1
+          fi
         else
           echo "❌ Build failed - Sending failure notification..."
           MSG=$(cat <<EOF
