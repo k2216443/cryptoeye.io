@@ -465,12 +465,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-## 📞 Contact
-
-**Author**: k2216443
-**Project**: [chaineye.io](https://github.com/k2216443/chaineye.io)
-**Version**: v2.0
-
----
-
 *Built with ❤️ for the blockchain community*
