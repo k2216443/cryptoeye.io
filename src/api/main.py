@@ -134,7 +134,9 @@ async def trace(request: Request) -> JSONResponse:
     etherscan = Etherscan()
     tg = TelegramBot(bot_token=os.getenv("BOT_TOKEN"))
     security = etherscan.evaluate_address_security(address=addr)
-    tg.send_message(chat_id=body_json["message"]["chat"]["id"], text=security)
+
+    text = f"{ addr }: {security}"
+    tg.send_message(chat_id=body_json["message"]["chat"]["id"], text=text)
 
     
     # return JSONResponse(status_code=200, content={"ok": True})

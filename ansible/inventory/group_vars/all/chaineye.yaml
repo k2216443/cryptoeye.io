@@ -1,2 +1,3 @@
-chaineye_image: "292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:v2.0-5fa2a2c"
+chaineye_image: "292875404443.dkr.ecr.us-west-2.amazonaws.com/cryptoeye:v2.0-69ef53d"
 chaineye_etherscan_api_key: "{{ lookup('pipe', 'op item get etherscan --vault chaineye --account BQ7QSXSGEBB33GR2B4EARQO6QM --field password --reveal') }}"
+chaineye_bot_token: "{{ lookup('pipe', 'op item get bot_chaineyeio --vault chaineye --account BQ7QSXSGEBB33GR2B4EARQO6QM --field password --reveal') }}"

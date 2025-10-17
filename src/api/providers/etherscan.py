@@ -23,12 +23,20 @@ class Etherscan:
         q = dict(params)
         q["apikey"] = ETHERSCAN_API_KEY
         q["chainid"] = self.chainid
+
+        self.log.debug(f"{ETHERSCAN_API_URL}", params=q)
         r = requests.get(ETHERSCAN_API_URL, params=q, timeout=20)
         data = r.json()
+        
+        # self.log.debug(data)
         if data.get("status") != "1":
-            # Etherscan returns status "0" with message in "result"
-            self.log.error(api_error=data.get("result", "unknown"), where=params.get("action"))
-            raise RuntimeError(data.get("result", "etherscan error"))
+            if "message" not in data:
+                # Etherscan returns status "0" with message in "result"
+                self.log.error(api_error=data.get("result", "unknown"), where=params.get("action"))
+                raise RuntimeError(data.get("result", "etherscan error"))
+            else:
+                if data.get("status") != "No transactions found":
+                    pass
         return data
 
     def get_eth_balance(self, address: str) -> str:
