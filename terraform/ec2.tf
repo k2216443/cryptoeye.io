@@ -44,7 +44,7 @@ module "ec2" {
   ]
 
   # Optional: Root volume size in GB
-  disk_size  = 10
+  disk_size = 10
 
   # Optional: Private IP address within the subnet
   private_ip = "172.16.0.10"

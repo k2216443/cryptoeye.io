@@ -18,5 +18,5 @@ variable "subnets" {
 
 variable "name" {
   description = "Name of resource"
-  type = string
+  type        = string
 }

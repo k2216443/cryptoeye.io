@@ -7,8 +7,8 @@ resource "aws_s3_bucket" "terraform_state" {
 
   # Optional: Map of tags to assign to the bucket
   tags = {
-    Name        = "Terraform State Bucket"
-    ManagedBy   = "Terraform"
+    Name      = "Terraform State Bucket"
+    ManagedBy = "Terraform"
   }
 }
 
@@ -51,13 +51,13 @@ resource "aws_s3_bucket_public_access_block" "terraform_state" {
   bucket = aws_s3_bucket.terraform_state.id
 
   # Optional: Whether Amazon S3 should block public ACLs for this bucket
-  block_public_acls       = true
+  block_public_acls = true
 
   # Optional: Whether Amazon S3 should block public bucket policies for this bucket
-  block_public_policy     = true
+  block_public_policy = true
 
   # Optional: Whether Amazon S3 should ignore public ACLs for this bucket
-  ignore_public_acls      = true
+  ignore_public_acls = true
 
   # Optional: Whether Amazon S3 should restrict public bucket policies for this bucket
   restrict_public_buckets = true
@@ -73,7 +73,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "terraform_state" {
   # Required: List of configuration blocks describing lifecycle rules
   rule {
     # Required: Unique identifier for the rule
-    id     = "expire-old-versions"
+    id = "expire-old-versions"
 
     # Required: Whether the rule is currently being applied (Enabled or Disabled)
     status = "Enabled"
@@ -91,13 +91,13 @@ resource "aws_s3_bucket_lifecycle_configuration" "terraform_state" {
 
 resource "aws_dynamodb_table" "terraform_locks" {
   # Required: Name of the DynamoDB table
-  name         = var.dynamodb_table_name
+  name = var.dynamodb_table_name
 
   # Optional: Controls how you are charged for read and write throughput
   billing_mode = "PAY_PER_REQUEST"
 
   # Required: Attribute to use as the hash (partition) key
-  hash_key     = "LockID"
+  hash_key = "LockID"
 
   # Required: Set of nested attribute definitions (only for key attributes)
   attribute {

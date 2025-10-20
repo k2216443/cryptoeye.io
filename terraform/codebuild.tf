@@ -4,22 +4,28 @@ module "codebuild" {
   source = "./modules/codebuild"
 
   # Required: Docker image for the build environment
-  image              = "aws/codebuild/amazonlinux-aarch64-standard:3.0"
+  image = "aws/codebuild/amazonlinux-aarch64-standard:3.0"
 
   # Required: Compute type for the build environment
-  type               = "ARM_CONTAINER"
+  type = "ARM_CONTAINER"
 
   # Required: Name for the CodeBuild project
-  name               = "chaineye"
+  name = "chaineye"
 
   # Required: GitHub token for repository access
-  github_token       = var.github_token
+  github_token = var.github_token
 
   # Required: Telegram bot token for notifications
   telegram_bot_token = var.telegram_bot_token
 
   # Required: Etherscan API key for blockchain integration
-  ETHERSCAN_API_KEY  = var.ETHERSCAN_API_KEY
+  ETHERSCAN_API_KEY = var.ETHERSCAN_API_KEY
+
+  ecrs = [
+    "arn:aws:ecr:us-west-2:292875404443:repository/python",
+    "arn:aws:ecr:us-west-2:292875404443:repository/chaineye",
+    "arn:aws:ecr:us-west-2:292875404443:repository/chaineye-site",
+  ]
 }
 
 # Output: ARN of the ECR repository created by the module

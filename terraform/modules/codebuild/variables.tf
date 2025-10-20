@@ -41,3 +41,8 @@ variable "type" {
   type    = string
   default = "LINUX_CONTAINER"
 }
+
+variable "ecrs" {
+  type        = list(string)
+  description = "List of ECR for access"
+}
