@@ -146,7 +146,26 @@ async def trace(request: Request) -> JSONResponse:
 @app.get("/api/evaluate")
 async def evaluate(request: Request, addr: str = Query(..., description="Ethereum address 0x...")) -> JSONResponse:
 
-        
+
+    if not is_valid_eth_address(addr):
+        return JSONResponse(
+            status_code=400,
+            content={"ok": False, "error": "invalid address format, expected 0x + 40 hex chars"},
+        )
+
+    scanner: Etherscan = app.state.scanner
+    fn = partial(scanner.evaluate_address_security, address=addr, mode="full")
+    result: Dict[str, Any] = await anyio.to_thread.run_sync(fn)
+
+    return JSONResponse(content={"ok": True, "address": addr, "result": result})
+
+
+@app.get("/api/wallet/{addr}")
+async def evaluate_by_path(request: Request, addr: str) -> JSONResponse:
+    """
+    Evaluate wallet security by address in URL path.
+    Example: /api/wallet/0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb5
+    """
     if not is_valid_eth_address(addr):
         return JSONResponse(
             status_code=400,

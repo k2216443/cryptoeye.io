@@ -552,13 +552,18 @@
         // Fetch security data from API
         async function fetchSecurityData() {
             try {
-                const response = await fetch(`/api/evaluate?addr=${walletAddress}&chain=${chain}`);
+                const response = await fetch(`/api/wallet/${walletAddress}`);
 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
                 }
 
                 const data = await response.json();
+                if (!data.ok) {
+                    throw new Error(data.error || 'Failed to evaluate wallet');
+                }
+
                 displaySecurityData(data);
 
             } catch (error) {
@@ -573,11 +578,14 @@
             document.getElementById('loadingState').style.display = 'none';
             document.getElementById('securityReport').classList.add('show');
 
-            // Update risk score
-            const riskScore = data.risk_score || 0;
-            const riskLevel = getRiskLevel(riskScore);
+            const result = data.result || {};
+            const score = result.score || 0;
+            const metrics = result.metrics || {};
 
-            document.getElementById('scoreValue').textContent = riskScore;
+            // Update risk score
+            const riskLevel = getRiskLevel(score);
+
+            document.getElementById('scoreValue').textContent = score;
             const scoreCircle = document.getElementById('scoreCircle');
             const riskLabel = document.getElementById('riskLabel');
 
@@ -589,18 +597,21 @@
             const indicators = document.getElementById('securityIndicators');
             indicators.innerHTML = '';
 
-            if (data.flags && data.flags.length > 0) {
-                data.flags.forEach(flag => {
+            // Generate flags from metrics
+            const flags = generateFlags(metrics, score);
+
+            if (flags.length > 0) {
+                flags.forEach(flag => {
                     const flagDiv = document.createElement('div');
                     flagDiv.className = `flag-item ${flag.severity || ''}`;
                     flagDiv.innerHTML = `
-                        <strong>${flag.title || 'Security Flag'}</strong>
-                        <p>${flag.description || 'No description available'}</p>
+                        <strong>${flag.title}</strong>
+                        <p>${flag.description}</p>
                     `;
                     indicators.appendChild(flagDiv);
                 });
             } else {
-                indicators.innerHTML = '<div class="flag-item safe"><strong>✓ No Security Concerns</strong><p>This wallet shows no significant security risks based on our analysis.</p></div>';
+                indicators.innerHTML = '<div class="flag-item safe"><strong>✓ No Significant Security Concerns</strong><p>This wallet shows no major security risks based on our analysis.</p></div>';
             }
 
             // Display wallet details
@@ -608,11 +619,15 @@
             details.innerHTML = '';
 
             const detailItems = [
-                { label: 'Total Transactions', value: data.tx_count || 'N/A' },
-                { label: 'First Transaction', value: data.first_tx_date || 'N/A' },
-                { label: 'Last Transaction', value: data.last_tx_date || 'N/A' },
-                { label: 'Balance', value: data.balance || 'N/A' },
-                { label: 'Contract Interactions', value: data.contract_interactions || 'N/A' },
+                { label: 'Has Transaction History', value: metrics.has_history ? 'Yes' : 'No' },
+                { label: 'Account Age', value: metrics.age_days != null ? `${Math.floor(metrics.age_days)} days` : 'N/A' },
+                { label: 'Days Since Last Activity', value: metrics.inactive_days != null ? `${Math.floor(metrics.inactive_days)} days` : 'N/A' },
+                { label: 'Failed Transaction Ratio', value: metrics.failed_tx_ratio != null ? `${(metrics.failed_tx_ratio * 100).toFixed(1)}%` : 'N/A' },
+                { label: 'Unique Counterparties (90d)', value: metrics.unique_counterparties_90d != null ? metrics.unique_counterparties_90d : 'N/A' },
+                { label: 'Dust Transactions (90d)', value: metrics.dust_incoming_90d != null ? metrics.dust_incoming_90d : 'N/A' },
+                { label: 'Is Contract', value: metrics.is_contract ? 'Yes' : 'No' },
+                { label: 'Contract Verified', value: metrics.is_contract ? (metrics.contract_verified ? 'Yes' : 'No') : 'N/A' },
+                { label: 'Proxy Contract', value: metrics.is_contract && metrics.contract_proxy ? 'Yes' : 'No' },
             ];
 
             detailItems.forEach(item => {
@@ -626,10 +641,101 @@
             });
         }
 
+        // Generate flags from metrics
+        function generateFlags(metrics, score) {
+            const flags = [];
+
+            if (!metrics.has_history) {
+                flags.push({
+                    title: '⚠️ No Transaction History',
+                    description: 'This address has no recorded transactions on the blockchain.',
+                    severity: 'critical'
+                });
+            }
+
+            if (metrics.age_days != null && metrics.age_days < 7) {
+                flags.push({
+                    title: '⚠️ Very New Account',
+                    description: `Account is only ${Math.floor(metrics.age_days)} days old. New accounts may pose higher risk.`,
+                    severity: 'critical'
+                });
+            } else if (metrics.age_days != null && metrics.age_days < 30) {
+                flags.push({
+                    title: '⚠️ Recent Account',
+                    description: `Account is ${Math.floor(metrics.age_days)} days old. Still relatively new.`,
+                    severity: ''
+                });
+            }
+
+            if (metrics.failed_tx_ratio > 0.5) {
+                flags.push({
+                    title: '🚨 High Transaction Failure Rate',
+                    description: `${(metrics.failed_tx_ratio * 100).toFixed(1)}% of transactions failed. This is unusually high.`,
+                    severity: 'critical'
+                });
+            } else if (metrics.failed_tx_ratio > 0.2) {
+                flags.push({
+                    title: '⚠️ Elevated Transaction Failures',
+                    description: `${(metrics.failed_tx_ratio * 100).toFixed(1)}% of transactions failed.`,
+                    severity: ''
+                });
+            }
+
+            if (metrics.unique_counterparties_90d != null && metrics.unique_counterparties_90d < 3) {
+                flags.push({
+                    title: '⚠️ Limited Activity',
+                    description: `Only ${metrics.unique_counterparties_90d} unique counterparties in the last 90 days.`,
+                    severity: ''
+                });
+            }
+
+            if (metrics.dust_incoming_90d > 20) {
+                flags.push({
+                    title: '⚠️ Dust Transactions Detected',
+                    description: `${metrics.dust_incoming_90d} dust transactions (< 0.001 ETH) in last 90 days. May indicate spam or testing.`,
+                    severity: ''
+                });
+            }
+
+            if (metrics.inactive_days != null && metrics.inactive_days > 180) {
+                flags.push({
+                    title: '⚠️ Long Inactivity Period',
+                    description: `No activity for ${Math.floor(metrics.inactive_days)} days. Account may be abandoned.`,
+                    severity: ''
+                });
+            }
+
+            if (metrics.is_contract) {
+                if (!metrics.contract_verified) {
+                    flags.push({
+                        title: '🚨 Unverified Contract',
+                        description: 'This is a smart contract, but the source code is not verified. This poses significant risks.',
+                        severity: 'critical'
+                    });
+                } else {
+                    flags.push({
+                        title: '✓ Verified Contract',
+                        description: 'This smart contract has verified source code.',
+                        severity: 'safe'
+                    });
+                }
+
+                if (metrics.contract_proxy) {
+                    flags.push({
+                        title: '⚠️ Proxy Contract',
+                        description: 'This is an upgradeable proxy contract. Contract logic can be changed.',
+                        severity: ''
+                    });
+                }
+            }
+
+            return flags;
+        }
+
         // Determine risk level from score
         function getRiskLevel(score) {
-            if (score < 30) return 'low';
-            if (score < 70) return 'medium';
+            if (score >= 70) return 'low';
+            if (score >= 40) return 'medium';
             return 'high';
         }
 
