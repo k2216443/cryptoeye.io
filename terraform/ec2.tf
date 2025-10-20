@@ -16,13 +16,13 @@ module "ec2" {
   subnet = module.network.subnet-public-0-name
 
   # Required: Name tag for the EC2 instance
-  name = "cryptoeye-0"
+  name = "chaineye-0"
 
   # Required: Whether the instance should have a public IP address
   expose = true
 
   # Required: SSH key pair name for instance access
-  ssh_key = aws_key_pair.cryptoeye.key_name
+  ssh_key = aws_key_pair.chaineye.key_name
 
   # Required: List of ingress rules defining allowed inbound traffic
   ingresses = [

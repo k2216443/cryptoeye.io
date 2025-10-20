@@ -1,0 +1,79 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36" version="28.2.7">
+  <diagram name="Page-1" id="3VL0bo9ulwIewEFvRI8m">
+    <mxGraphModel dx="702" dy="452" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="wzPLCL-uNyCu6Ja5K4PE-1" value="Actor" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontFamily=Roboto Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BMono;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="280" width="40" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="wzPLCL-uNyCu6Ja5K4PE-2" value="AWS Load Balancer&lt;br&gt;chaineye" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Roboto Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BMono;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="160" y="280" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="wzPLCL-uNyCu6Ja5K4PE-3" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Roboto Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BMono;fontSize=10;" edge="1" parent="1" source="wzPLCL-uNyCu6Ja5K4PE-1" target="wzPLCL-uNyCu6Ja5K4PE-2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="100" y="470" as="sourcePoint" />
+            <mxPoint x="150" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wzPLCL-uNyCu6Ja5K4PE-4" value="AWS Target Group (chaineye)" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;fontFamily=Roboto Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BMono;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="360" y="200" width="600" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="wzPLCL-uNyCu6Ja5K4PE-6" value="EC2 Instance:&amp;nbsp;chaineye-0" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;fontFamily=Roboto Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BMono;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="390" y="240" width="530" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="wzPLCL-uNyCu6Ja5K4PE-7" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;fontFamily=Roboto Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BMono;fontSize=10;" edge="1" parent="1" source="wzPLCL-uNyCu6Ja5K4PE-2" target="wzPLCL-uNyCu6Ja5K4PE-8">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="300" y="490" as="sourcePoint" />
+            <mxPoint x="350" y="440" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wzPLCL-uNyCu6Ja5K4PE-9" value="Port:443" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontFamily=Roboto Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BMono;fontSize=10;fontStyle=0" vertex="1" connectable="0" parent="wzPLCL-uNyCu6Ja5K4PE-7">
+          <mxGeometry x="-0.5636" y="2" relative="1" as="geometry">
+            <mxPoint x="16" y="-8" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wzPLCL-uNyCu6Ja5K4PE-8" value="Container: chaineye-nginx" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;fontFamily=Roboto Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BMono;fontSize=10;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="440" y="300" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="wzPLCL-uNyCu6Ja5K4PE-10" value="Container: chaineye-api" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;fontFamily=Roboto Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BMono;fontSize=10;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="720" y="300" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="wzPLCL-uNyCu6Ja5K4PE-11" value="/api/site" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0;entryDx=0;entryDy=0;startArrow=classic;startFill=1;fontFamily=Roboto Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BMono;fontSize=10;fontStyle=2;labelBackgroundColor=none;" edge="1" parent="1" source="wzPLCL-uNyCu6Ja5K4PE-8" target="wzPLCL-uNyCu6Ja5K4PE-10">
+          <mxGeometry y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="460" y="550" as="sourcePoint" />
+            <mxPoint x="510" y="500" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wzPLCL-uNyCu6Ja5K4PE-12" value="Telegram (chaineyeio_bot)" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Roboto Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BMono;fontSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="160" y="440" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="wzPLCL-uNyCu6Ja5K4PE-13" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Roboto Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BMono;fontSize=10;" edge="1" parent="1" source="wzPLCL-uNyCu6Ja5K4PE-1" target="wzPLCL-uNyCu6Ja5K4PE-12">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="180" y="370" as="sourcePoint" />
+            <mxPoint x="260" y="370" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wzPLCL-uNyCu6Ja5K4PE-15" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontFamily=Roboto Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BMono;fontSize=10;" edge="1" parent="1" source="wzPLCL-uNyCu6Ja5K4PE-12" target="wzPLCL-uNyCu6Ja5K4PE-2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="290" y="520" as="sourcePoint" />
+            <mxPoint x="340" y="470" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wzPLCL-uNyCu6Ja5K4PE-16" value="/api/tg" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontFamily=Roboto Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BMono;fontSize=10;fontStyle=2;labelBackgroundColor=none;" vertex="1" connectable="0" parent="wzPLCL-uNyCu6Ja5K4PE-15">
+          <mxGeometry x="0.031" y="1" relative="1" as="geometry">
+            <mxPoint x="31" y="1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wzPLCL-uNyCu6Ja5K4PE-17" value="/api/tg" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;startArrow=classic;startFill=1;fontFamily=Roboto Mono;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BMono;fontSize=10;fontStyle=2;labelBackgroundColor=none;" edge="1" parent="1" source="wzPLCL-uNyCu6Ja5K4PE-8" target="wzPLCL-uNyCu6Ja5K4PE-10">
+          <mxGeometry y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="670" y="450" as="sourcePoint" />
+            <mxPoint x="790" y="450" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

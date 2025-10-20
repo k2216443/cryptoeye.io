@@ -15,3 +15,8 @@ variable "subnets" {
   description = "subnets for LB"
   type        = list(string)
 }
+
+variable "name" {
+  description = "Name of resource"
+  type = string
+}

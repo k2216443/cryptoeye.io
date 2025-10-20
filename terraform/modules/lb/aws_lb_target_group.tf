@@ -3,7 +3,7 @@
 
 resource "aws_lb_target_group" "backend" {
   # Optional: Target group name
-  name = "tg-backend-8080"
+  name = var.name
 
   # Required: Port for routing traffic to targets
   port = 8080

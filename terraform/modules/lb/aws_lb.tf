@@ -3,7 +3,7 @@
 
 resource "aws_lb" "chaineye" {
   # Optional: Load balancer name
-  name = "chaineye"
+  name = var.name
 
   # Optional: Load balancer type (application, network, or gateway)
   load_balancer_type = "application"

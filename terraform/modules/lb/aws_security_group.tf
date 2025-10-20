@@ -26,6 +26,21 @@ resource "aws_security_group" "alb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # Optional: Ingress rule block for inbound traffic
+  ingress {
+    # Required: Protocol (-1 for all, tcp, udp, icmp)
+    protocol = "tcp"
+
+    # Required: Start of port range
+    from_port = 80
+
+    # Required: End of port range
+    to_port = 80
+
+    # Optional: List of CIDR blocks
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   # Optional: Egress rule block for outbound traffic
   egress {
     # Required: Protocol (-1 for all protocols)
