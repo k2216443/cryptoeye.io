@@ -1,6 +1,6 @@
 # Base and only playbook to make a configuration on
 # all hosts.
-- hosts: cryptoeye-0
+- hosts: chaineye-0
   become: true
   
   # At current time not sure do we need it

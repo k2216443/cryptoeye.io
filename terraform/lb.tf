@@ -3,8 +3,11 @@
 module "lb" {
   source = "./modules/lb"
 
-  # Reuired: Name of resources
+  # Required: Name of resources
   name = "chaineye"
+
+  # Required: Port for Target Group
+  port = 8080
 
   # Required: EC2 instance ID to register as a target
   target_id = module.ec2.instance-id

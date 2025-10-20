@@ -6,7 +6,7 @@ resource "aws_lb_target_group" "backend" {
   name = var.name
 
   # Required: Port for routing traffic to targets
-  port = 8080
+  port = var.port
 
   # Required: Protocol for routing traffic (HTTP, HTTPS, TCP, etc.)
   protocol = "HTTP"

@@ -20,3 +20,8 @@ variable "name" {
   description = "Name of resource"
   type        = string
 }
+
+variable "port" {
+  description = "Port number"
+  type        = number
+}
