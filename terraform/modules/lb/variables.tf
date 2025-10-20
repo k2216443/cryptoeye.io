@@ -1,3 +1,5 @@
+# Terraform Variables for Load Balancer Module
+# Documentation: https://developer.hashicorp.com/terraform/language/values/variables
 
 variable "vpc_id" {
   description = "vpc_id"
@@ -6,10 +8,10 @@ variable "vpc_id" {
 
 variable "target_id" {
   description = "Target ID"
-  type = string
+  type        = string
 }
 
 variable "subnets" {
   description = "subnets for LB"
-  type = list(string)
+  type        = list(string)
 }

@@ -1,3 +1,6 @@
+# Terraform Variables for EC2 Module
+# Documentation: https://developer.hashicorp.com/terraform/language/values/variables
+
 variable "instance_type" {
   description = "Instance Type"
   type        = string

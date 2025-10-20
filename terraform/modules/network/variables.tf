@@ -1,3 +1,5 @@
+# Terraform Variables for Network Module
+# Documentation: https://developer.hashicorp.com/terraform/language/values/variables
 
 variable "name" {
   description = "Name"

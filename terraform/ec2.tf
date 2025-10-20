@@ -1,38 +1,30 @@
+# Module: EC2 instance for running the application with security groups and IAM roles
+
 module "ec2" {
   source = "./modules/ec2"
 
-  # (Required) Amazon machine Instance 
-  # Amazon Linux 2023 kernel-6.1 AMI
+  # Required: Amazon Machine Image ID (Amazon Linux 2023 kernel-6.1 AMI)
   ami = "ami-07b2b18045edffe90"
 
-  # The instance size/type, determining the compute and memory capacity.
+  # Required: EC2 instance type determining compute and memory capacity
   instance_type = "t4g.nano"
 
-  # The name of the SSH key to be used for the instance. 
-  # This key was created or imported into AWS on 2023-07-14 for the 'wayside.sandbox' environment.
-  # ssh_key = "wayside.sandbox-2023-07-14"
-
-  # The identifier or name tag of the Virtual Private Cloud (VPC) where the instance will be deployed.
-  # The name suggests this is a sandbox or non-production environment.
+  # Required: VPC name tag where the instance will be deployed
   vpc = module.network.vpc_name
 
-  # The identifier or name tag of the subnet within the VPC where the instance will be deployed.
-  # This is the first subnet within the 'sandbox' VPC.
+  # Required: Subnet name tag within the VPC for instance placement
   subnet = module.network.subnet-public-0-name
 
-  # The descriptive name for the instance, indicating its purpose or application.
-  # In this case, the instance is likely running the Jenkins continuous integration server.
+  # Required: Name tag for the EC2 instance
   name = "cryptoeye-0"
 
-  # A boolean flag that determines whether the instance should be publicly accessible 
-  # (e.g., have a public IP or be placed in a public subnet). 
-  # A value of 'true' suggests it will be exposed to the public internet.
+  # Required: Whether the instance should have a public IP address
   expose = true
 
+  # Required: SSH key pair name for instance access
   ssh_key = aws_key_pair.cryptoeye.key_name
 
-  # A list of ingress rules that define what kind of network traffic is allowed to reach the instance.
-  # This configuration allows TCP traffic on ports 443 (typically HTTPS) and 22 (SSH).
+  # Required: List of ingress rules defining allowed inbound traffic
   ingresses = [
     {
       "proto" : "tcp",
@@ -51,9 +43,13 @@ module "ec2" {
     }
   ]
 
+  # Optional: Root volume size in GB
   disk_size  = 10
+
+  # Optional: Private IP address within the subnet
   private_ip = "172.16.0.10"
 
+  # Optional: IAM policy document for instance role permissions
   policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -70,10 +66,12 @@ module "ec2" {
 EOF
 }
 
+# Output: Public IP address of the EC2 instance
 output "public_ip" {
   value = module.ec2.public_ip
 }
 
+# Output: EC2 instance ID
 output "instance-id" {
   value = module.ec2.instance-id
 }

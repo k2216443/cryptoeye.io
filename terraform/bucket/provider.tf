@@ -1,16 +1,11 @@
-# Terraform Configuration for AWS
+# AWS Provider Configuration - Configures AWS provider for resource management
+# Documentation: https://registry.terraform.io/providers/hashicorp/aws/latest/docs
 
-# --- AWS Provider Configuration ---
-
-# The provider block is used to configure the named provider, in this case, AWS.
 provider "aws" {
-  # Specify the AWS region where resources will be managed.
-  # "us-west-2" is the AWS code for the Oregon region.
+  # Optional: AWS region where resources will be managed
   region = "us-west-2"
 
-  # Reference to the AWS CLI named profile. This profile should be configured in your 
-  # AWS CLI setup and contains the necessary credentials to interact with AWS.
-  # Using named profiles helps in managing multiple AWS configurations and accounts.
+  # Optional: AWS CLI named profile containing credentials
   profile = "cryptoeye"
 }
 

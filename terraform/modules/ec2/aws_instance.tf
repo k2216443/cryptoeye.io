@@ -1,61 +1,60 @@
-# Define an AWS EC2 instance
+# AWS EC2 Instance - Virtual server in AWS
 # Documentation: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance
+
 resource "aws_instance" "instance" {
-  # AMI ID to use for the instance
-  # See: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#ami
+  # Required: AMI ID to use for the instance
   ami = var.ami
 
-  # The instance type (e.g., t2.micro, m5.large)
-  # See: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#instance_type
+  # Required: Instance type (e.g., t2.micro, m5.large)
   instance_type = var.instance_type
 
-  # The key name of the SSH key to attach for the instance
-  # See: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#key_name
-  key_name   = var.ssh_key
+  # Optional: SSH key name for instance access
+  key_name = var.ssh_key
+
+  # Optional: Enable detailed CloudWatch monitoring
   monitoring = true
 
-  # Enable EBS optimization for supported instance types
-  # See: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#ebs_optimized
+  # Optional: Enable EBS optimization for supported instance types
   ebs_optimized = true
 
-  # Associate a network interface with the instance
-  # See: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#network_interface
-  # network_interface {
-  #   # ID of the network interface to attach to the instance
-  #   network_interface_id = aws_network_interface.nt.id
-  #   # The index of the network interface (0 for primary interface)
-  #   device_index = 0
-  # }
-
-  # Whether to associate a public IP address with the instance (false for private instances)
-  # See: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#associate_public_ip_address
+  # Optional: Associate public IP address with instance
   associate_public_ip_address = var.expose
-  subnet_id                   = data.aws_subnet.subnet.id
+
+  # Required: Subnet ID where instance will be launched
+  subnet_id = data.aws_subnet.subnet.id
+
+  # Optional: List of security group IDs
   vpc_security_group_ids = [
     aws_security_group.sg.id
   ]
+
+  # Optional: Private IP address for the instance
   private_ip = var.private_ip
 
-  # Configuration for the root block device
-  # See: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#root_block_device
+  # Optional: Root block device configuration
   root_block_device {
-    # Whether to delete the root block device when the instance is terminated
+    # Optional: Delete root volume on instance termination
     delete_on_termination = true
-    # Whether the root block device should be encrypted
+
+    # Optional: Enable EBS encryption
     encrypted = false
-    # Tags for the root block device
+
+    # Optional: Tags for the root volume
     tags = {
       "Name" : "${var.name}"
     }
-    # Size of the root volume (in GiB)
+
+    # Optional: Root volume size in GiB
     volume_size = var.disk_size
-    # Type of volume (gp2 for General Purpose SSD, for example)
+
+    # Optional: Volume type (gp2, gp3, io1, etc.)
     volume_type = "gp2"
   }
 
+  # Optional: IAM instance profile name
   iam_instance_profile = aws_iam_instance_profile.ecsInstanceProfile.name
-  # Tags assigned to the instance
-  # See: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#tags
+
+  # Optional: Resource tags
   tags = {
     "Name" : "${var.name}",
     "Module" : "ec2"

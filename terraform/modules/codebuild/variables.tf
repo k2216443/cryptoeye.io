@@ -1,6 +1,8 @@
+# Terraform Variables for CodeBuild Module
+# Documentation: https://developer.hashicorp.com/terraform/language/values/variables
+
 variable "name" {
-  type    = string
-  default = "cryptoeye"
+  type = string
 }
 
 variable "github_token" {

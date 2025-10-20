@@ -1,54 +1,62 @@
-# ======================================================================================================= #
-# VPN environment Security Groups                                                                         #
-# ======================================================================================================= #
-# Define an AWS Security Group for controlling access to and from instances within a VPC
+# AWS Security Group - Virtual firewall for EC2 instances
 # Documentation: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group
+
 resource "aws_security_group" "sg" {
-  # Name of the security group, should be unique within the VPC
+  # Optional: Security group name (must be unique within VPC)
   name = var.name
 
-  # ID of the VPC where the security group is created
+  # Required: VPC ID where security group will be created
   vpc_id = data.aws_vpc.vpc.id
 
-  # Dynamic ingress rules based on provided variables
+  # Optional: Dynamic ingress rules based on input variables
   dynamic "ingress" {
     for_each = var.ingresses
     content {
-      # CIDR blocks from which inbound traffic is allowed for dynamic rules
+      # Optional: List of CIDR blocks for inbound traffic
       cidr_blocks = ingress.value["cidr_blocks"]
-      # Description for the dynamic ingress rule
+
+      # Optional: Rule description
       description = ""
-      # The starting port for traffic for dynamic rules
+
+      # Required: Start of port range
       from_port = ingress.value["port"]
-      # The CIDR blocks for IPv6 for dynamic rules (empty in this case)
+
+      # Optional: List of IPv6 CIDR blocks
       ipv6_cidr_blocks = []
-      # AWS Prefix List IDs for dynamic rules (not used here)
+
+      # Optional: List of AWS Prefix List IDs
       prefix_list_ids = []
-      # The protocol for dynamic rules
+
+      # Required: Protocol (-1 for all, tcp, udp, icmp)
       protocol = ingress.value["proto"]
-      # A list of security group IDs to allow access for dynamic rules (not used here)
+
+      # Optional: List of security group IDs to allow access
       security_groups = []
-      # Whether the rule applies to the security group itself for dynamic rules (not used here)
+
+      # Optional: Allow rule to reference itself
       self = false
-      # The ending port for traffic for dynamic rules
+
+      # Required: End of port range
       to_port = ingress.value["port"]
     }
   }
 
-  # Egress rule allowing all outbound traffic to any IP address
-  # See: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group#egress
+  # Optional: Egress rule for outbound traffic
   egress {
-    # The starting port for outbound traffic (0 for all ports)
+    # Required: Start of port range (0 for all)
     from_port = 0
-    # The ending port for outbound traffic (0 for all ports)
+
+    # Required: End of port range (0 for all)
     to_port = 0
-    # The protocol (using -1 for all protocols)
+
+    # Required: Protocol (-1 for all protocols)
     protocol = "-1"
-    # The CIDR blocks to which outbound traffic is allowed
+
+    # Optional: List of CIDR blocks for outbound traffic
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Tags assigned to the security group
+  # Optional: Resource tags
   tags = {
     Name = var.name
   }
