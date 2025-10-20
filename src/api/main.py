@@ -92,7 +92,7 @@ async def evaluate(request: Request) -> JSONResponse:
         content={"ok": True}
     )
 
-@app.api_route("/t", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
+@app.api_route("/api/tg", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
 async def trace(request: Request) -> JSONResponse:
     req_id = get_request_id(request)
 
@@ -143,7 +143,7 @@ async def trace(request: Request) -> JSONResponse:
     # return JSONResponse(status_code=200, content={"ok": True})
 
 
-@app.get("/evaluate")
+@app.get("/api/evaluate")
 async def evaluate(request: Request, addr: str = Query(..., description="Ethereum address 0x...")) -> JSONResponse:
 
         

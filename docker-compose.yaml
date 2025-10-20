@@ -1,0 +1,116 @@
+# ChainEye Docker Compose Configuration
+#
+# This file orchestrates the ChainEye blockchain wallet security platform,
+# running both the FastAPI backend and the Nginx static site in containers.
+#
+# Usage:
+#   Start: docker-compose up -d
+#   Stop:  docker-compose down
+#   Logs:  docker-compose logs -f
+
+version: '3.8'
+
+services:
+  # FastAPI Backend Service
+  # Handles wallet security analysis and blockchain API integration
+  api:
+    build:
+      context: ./src/api
+      dockerfile: Dockerfile
+    container_name: chaineye-api
+
+    # Expose API on port 8080
+    ports:
+      - "8080:8080"
+
+    # Environment configuration
+    # Set these in a .env file or export before running docker-compose
+    environment:
+      # Required: Etherscan API key
+      - ETHERSCAN_API_KEY=${ETHERSCAN_API_KEY}
+      # Optional: Telegram bot token
+      - BOT_TOKEN=${BOT_TOKEN}
+      # Log level (DEBUG, INFO, WARNING, ERROR)
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      # JSON log file path
+      - LOG_FILE=/var/log/cryptoeye.json.log
+
+    # Persistent volume for application logs
+    volumes:
+      - api-logs:/var/log
+
+    # Connect to internal network for service communication
+    networks:
+      - chaineye-network
+
+    # Auto-restart policy (unless manually stopped)
+    restart: unless-stopped
+
+    # Health check to ensure API is responsive
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      # Check every 30 seconds
+      interval: 30s
+      # Fail if no response in 10 seconds
+      timeout: 10s
+      # Retry 3 times before marking unhealthy
+      retries: 3
+      # Grace period during container startup
+      start_period: 40s
+
+  # Nginx Static Site Service
+  # Serves the web interface and proxies API requests to the backend
+  site:
+    build:
+      context: ./src/static
+      dockerfile: Dockerfile
+    container_name: chaineye-site
+
+    # Expose web interface on port 8000
+    ports:
+      - "8000:8000"
+
+    # Mount Docker Compose specific nginx config
+    # This config uses service name 'api:8080' for container networking
+    # instead of '127.0.0.1:8080' used in production
+    volumes:
+      - ./src/static/nginx.docker-compose.conf:/etc/nginx/nginx.conf:ro
+
+    # Wait for API service to be healthy before starting
+    depends_on:
+      api:
+        condition: service_healthy
+
+    # Connect to same network as API for internal communication
+    networks:
+      - chaineye-network
+
+    # Auto-restart policy
+    restart: unless-stopped
+
+    # Allow access to host machine (if needed for development)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    # Health check to ensure nginx is serving traffic
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      # Nginx starts faster than API
+      start_period: 10s
+
+# Docker Networks
+# Internal bridge network for inter-service communication
+networks:
+  chaineye-network:
+    driver: bridge
+    name: chaineye-network
+
+# Named Volumes
+# Persistent storage for application data
+volumes:
+  # API log files stored persistently across container restarts
+  api-logs:
+    name: chaineye-api-logs
