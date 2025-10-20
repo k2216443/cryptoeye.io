@@ -25,9 +25,9 @@
       BOT_TOKEN: "{{ chaineye_bot_token }}"
 
 # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/wait_for_module.html
-- name: "Task:: ansible.builtint.wait_for: waiting for port to be open 8080"
+- name: "Task:: ansible.builtint.wait_for: waiting for port to be open 8000"
   ansible.builtin.wait_for:
-    port: 8080
+    port: 8000
 
 # https://docs.ansible.com/ansible/latest/collections/community/docker/docker_container_module.html
 - name: "Task:: ansible.builtin.docker_container: Deploing container: {{ chaineye_static_image }}"
@@ -38,8 +38,8 @@
     restart_policy: always
 
 # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/wait_for_module.html
-- name: "Task:: ansible.builtint.wait_for: waiting for port to be open 8000"
+- name: "Task:: ansible.builtint.wait_for: waiting for port to be open 8080"
   ansible.builtin.wait_for:
-    port: 8000
+    port: 8080
 
 - include_tasks: "smoke_test.yaml"

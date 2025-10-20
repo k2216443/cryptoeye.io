@@ -1,6 +1,6 @@
 - name: Check evaluator returns ok:true
   ansible.builtin.uri:
-    url: "http://localhost:8080/evaluate?addr=0x4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f91"
+    url: "http://localhost:8000/evaluate?addr=0x4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f91"
     method: GET
     headers:
       Accept: application/json

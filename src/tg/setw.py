@@ -4,7 +4,7 @@ import os
 url = f"https://api.telegram.org/bot{os.getenv('BOT_TOKEN')}/setWebhook"
 
 payload = {
-    "url": "https://chaineye.io/t",
+    "url": "https://chaineye.io/api/tg",
 }
 headers = {
     "accept": "application/json",
