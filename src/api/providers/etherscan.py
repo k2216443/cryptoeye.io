@@ -84,11 +84,11 @@ class Etherscan:
         if self.log:
             log_params = {k: ("***REDACTED***" if k == "apikey" else v) for k, v in q.items()}
             self.log.info(
-                f"📡 Etherscan API Call: {params.get('module')}.{params.get('action')}",
+                f"Etherscan API Call: {params.get('module')}.{params.get('action')}",
                 extra={
                     "event": "etherscan_request",
-                    "module": params.get("module"),
-                    "action": params.get("action"),
+                    "api_module": params.get("module"),
+                    "api_action": params.get("action"),
                     "address": params.get("address", "N/A"),
                     "params": log_params,
                 }
@@ -107,12 +107,12 @@ class Etherscan:
                 result_length = len(data.get("result", [])) if isinstance(data.get("result"), list) else "N/A"
 
                 self.log.info(
-                    f"✅ Etherscan Response: {params.get('action')} ({call_duration:.2f}s)",
+                    f"Etherscan Response: {params.get('action')} ({call_duration:.2f}s) - OK",
                     extra={
                         "event": "etherscan_response",
-                        "action": params.get("action"),
-                        "status": data.get("status"),
-                        "message": data.get("message"),
+                        "api_action": params.get("action"),
+                        "api_status": data.get("status"),
+                        "api_message": data.get("message"),
                         "duration_seconds": round(call_duration, 3),
                         "result_type": result_type,
                         "result_length": result_length,
@@ -127,12 +127,12 @@ class Etherscan:
 
                 if self.log:
                     self.log.error(
-                        f"❌ Etherscan Error: {params.get('action')} - {err}",
+                        f"Etherscan Error: {params.get('action')} - {err}",
                         extra={
                             "event": "etherscan_error",
-                            "action": params.get("action"),
+                            "api_action": params.get("action"),
                             "error": str(err),
-                            "status": data.get("status"),
+                            "api_status": data.get("status"),
                             "full_response": data,
                         }
                     )
@@ -144,10 +144,10 @@ class Etherscan:
             call_duration = time.time() - call_start
             if self.log:
                 self.log.error(
-                    f"🔌 Network Error: {params.get('action')} - {str(e)}",
+                    f"Network Error: {params.get('action')} - {str(e)}",
                     extra={
                         "event": "network_error",
-                        "action": params.get("action"),
+                        "api_action": params.get("action"),
                         "error": str(e),
                         "duration_seconds": round(call_duration, 3),
                     }
@@ -176,7 +176,7 @@ class Etherscan:
         if self.log:
             balance_eth = wei_to_eth(balance_wei)
             self.log.debug(
-                f"💰 Balance: {balance_eth:.6f} ETH ({balance_wei} Wei)",
+                f"Balance: {balance_eth:.6f} ETH ({balance_wei} Wei)",
                 extra={"event": "balance_fetched", "address": address, "balance_wei": balance_wei, "balance_eth": balance_eth}
             )
 
