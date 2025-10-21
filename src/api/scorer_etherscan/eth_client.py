@@ -25,22 +25,25 @@ class EtherscanClient:
         return self._call({"module":"account","action":"balance","address":address,"tag":"latest"})["result"]
 
     def get_txlist(self, address: str, start_block: int = 0, end_block: int = 99999999):
-        return self._call({
+        result = self._call({
             "module":"account","action":"txlist","address":address,
             "startblock":start_block,"endblock":end_block,"sort":"asc"
         }).get("result", [])
+        return result if isinstance(result, list) else []
 
     def get_internal_tx(self, address: str, start_block: int = 0, end_block: int = 99999999):
-        return self._call({
+        result = self._call({
             "module":"account","action":"txlistinternal","address":address,
             "startblock":start_block,"endblock":end_block,"sort":"asc"
         }).get("result", [])
+        return result if isinstance(result, list) else []
 
     def get_token_txs(self, address: str, start_block: int = 0, end_block: int = 99999999):
-        return self._call({
+        result = self._call({
             "module":"account","action":"tokentx","address":address,
             "startblock":start_block,"endblock":end_block,"sort":"asc"
         }).get("result", [])
+        return result if isinstance(result, list) else []
 
     def get_contract_meta(self, address: str):
         arr = self._call({"module":"contract","action":"getsourcecode","address":address}).get("result", [])
