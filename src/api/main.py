@@ -11,7 +11,7 @@ from functools import partial
 from fastapi import FastAPI, Query, Request
 from fastapi.responses import JSONResponse
 
-from providers.etherscan2 import Etherscan, format_for_tg
+from providers.etherscan import Etherscan, format_for_tg
 from libs.tg import TelegramBot
 from libs.format import format_security_message
 
@@ -25,7 +25,7 @@ def get_request_id(request: Request) -> Optional[str]:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.scanner = Etherscan()
+    app.state.scanner = Etherscan(logger=log)
     yield
 
 def setup_logging() -> logging.Logger:
@@ -155,6 +155,7 @@ async def evaluate(request: Request, addr: str = Query(..., description="Ethereu
             content={"ok": False, "error": "invalid address format, expected 0x + 40 hex chars"},
         )
 
+    log.debug(f"[evaluate] { addr = }")
     scanner: Etherscan = app.state.scanner
     fn = partial(scanner.evaluate_address_security, address=addr, mode="full")
     result: Dict[str, Any] = await anyio.to_thread.run_sync(fn)
@@ -174,6 +175,7 @@ async def evaluate_by_path(request: Request, addr: str) -> JSONResponse:
             content={"ok": False, "error": "invalid address format, expected 0x + 40 hex chars"},
         )
 
+    log.info(f"[evaluate_by_path] { addr = }")
     scanner: Etherscan = app.state.scanner
     fn = partial(scanner.evaluate_address_security, address=addr, mode="full")
     result: Dict[str, Any] = await anyio.to_thread.run_sync(fn)

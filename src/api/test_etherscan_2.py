@@ -3,7 +3,7 @@ import os
 
 from pythonjsonlogger import jsonlogger
 
-from providers.etherscan2 import Etherscan
+from api.providers.etherscan import Etherscan
 
 def setup_logging() -> logging.Logger:
     level = os.getenv("LOG_LEVEL", "INFO").upper()
