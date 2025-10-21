@@ -11,7 +11,7 @@ from functools import partial
 from fastapi import FastAPI, Query, Request
 from fastapi.responses import JSONResponse
 
-from providers.etherscan import Etherscan
+from providers.etherscan2 import Etherscan, format_for_tg
 from libs.tg import TelegramBot
 from libs.format import format_security_message
 
@@ -131,13 +131,15 @@ async def trace(request: Request) -> JSONResponse:
         tg.send_message(chat_id=body_json["message"]["chat"]["id"], text="invalid address format, expected 0x + 40 hex chars")
         return
 
-
-
-    etherscan = Etherscan()
+    etherscan = Etherscan(logger=log)
     tg = TelegramBot(bot_token=os.getenv("BOT_TOKEN"))
-    security = etherscan.evaluate_address_security(address=addr)
-    text = format_security_message(addr, security)
-    tg.send_message(chat_id=body_json["message"]["chat"]["id"], text=text, parse_mode="HTML")
+    security = etherscan.evaluate_address_security(address=addr, mode="full")
+
+
+    log.info(f"{ security = }")
+    # text = format_security_message(addr, security)
+    msg, _ = format_for_tg(addr, security)
+    tg.send_message(chat_id=body_json["message"]["chat"]["id"], text=msg, parse_mode="HTML")
 
     
     # return JSONResponse(status_code=200, content={"ok": True})
