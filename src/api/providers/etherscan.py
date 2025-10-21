@@ -51,7 +51,10 @@ class Etherscan:
 
     def __init__(self, chainid: int = 1, logger=None):
         self.chainid = chainid
-        self.log = logger  # optional: your own logger with .debug/.error
+
+        # optional: your own logger with .debug/.error
+        self.log = logger
+
 
     # --- low-level call ---
     def _call(self, params: Dict[str, Any]) -> Dict[str, Any]:
@@ -209,7 +212,7 @@ class Etherscan:
         if not isinstance(result, list):
             if self.log:
                 self.log.warning(
-                    f"⚠️  Expected list for txlist, got {type(result).__name__}: {str(result)[:100]}",
+                    f"Expected list for txlist, got {type(result).__name__}: {str(result)[:100]}",
                     extra={"event": "unexpected_response_type", "expected": "list", "got": type(result).__name__}
                 )
             return []
@@ -250,7 +253,7 @@ class Etherscan:
         if not isinstance(result, list):
             if self.log:
                 self.log.warning(
-                    f"⚠️  Expected list for internal tx, got {type(result).__name__}",
+                    f"Expected list for internal tx, got {type(result).__name__}",
                     extra={"event": "unexpected_response_type", "action": "txlistinternal"}
                 )
             return []
@@ -290,7 +293,7 @@ class Etherscan:
         if not isinstance(result, list):
             if self.log:
                 self.log.warning(
-                    f"⚠️  Expected list for token tx, got {type(result).__name__}",
+                    f"Expected list for token tx, got {type(result).__name__}",
                     extra={"event": "unexpected_response_type", "action": "tokentx"}
                 )
             return []
@@ -325,7 +328,7 @@ class Etherscan:
                 is_verified = bool(meta.get("SourceCode"))
                 is_proxy = meta.get("Proxy", "0") == "1"
                 self.log.info(
-                    f"📋 Contract: {meta.get('ContractName', 'Unknown')} (Verified: {is_verified}, Proxy: {is_proxy})",
+                    f"Contract: {meta.get('ContractName', 'Unknown')} (Verified: {is_verified}, Proxy: {is_proxy})",
                     extra={
                         "event": "contract_meta_fetched",
                         "is_contract": True,
@@ -336,7 +339,7 @@ class Etherscan:
                 )
             else:
                 self.log.info(
-                    "👤 Address Type: EOA (Externally Owned Account)",
+                    "Address Type: EOA (Externally Owned Account)",
                     extra={"event": "contract_meta_fetched", "is_contract": False}
                 )
 
@@ -612,7 +615,7 @@ class Etherscan:
 
         if self.log:
             self.log.info(
-                f"🔍 Starting wallet evaluation for {address}",
+                f"Starting wallet evaluation for {address}",
                 extra={
                     "event": "evaluation_start",
                     "address": address,
@@ -623,7 +626,7 @@ class Etherscan:
 
         # ========== STEP 1: Fetch blockchain data ==========
         if self.log:
-            self.log.info("📊 Step 1/3: Fetching blockchain data from Etherscan", extra={"event": "fetch_start"})
+            self.log.info("Step 1/3: Fetching blockchain data from Etherscan", extra={"event": "fetch_start"})
 
         try:
             txs = self._get_txlist(address)
@@ -634,7 +637,7 @@ class Etherscan:
 
             if self.log:
                 self.log.info(
-                    "✅ Data fetch complete",
+                    "Data fetch complete",
                     extra={
                         "event": "fetch_complete",
                         "tx_count": len(txs),
@@ -647,7 +650,7 @@ class Etherscan:
         except Exception as e:
             if self.log:
                 self.log.error(
-                    f"❌ Fatal: Failed to fetch blockchain data - {str(e)}",
+                    f"Fatal: Failed to fetch blockchain data - {str(e)}",
                     extra={"event": "fetch_failed", "error": str(e), "address": address}
                 )
 
@@ -664,7 +667,7 @@ class Etherscan:
 
         # ========== STEP 2: Analyze blockchain data ==========
         if self.log:
-            self.log.info("🧮 Step 2/3: Analyzing transaction patterns", extra={"event": "analysis_start"})
+            self.log.info("Step 2/3: Analyzing transaction patterns", extra={"event": "analysis_start"})
 
         # Calculate basic metrics
         has_eth_history = bool(txs or internal)
@@ -673,13 +676,24 @@ class Etherscan:
         recent_90d = self._slice_recent(txs, now - 90 * 86400)
         token_recent_90d = self._slice_recent(tokentx, now - 90 * 86400)
 
+        # Extract contract metadata
+        is_contract = bool(meta.get("ABI") != "Contract source code not verified")
+        contract_verified = bool(meta.get("SourceCode")) if is_contract else False
+        contract_proxy = meta.get("Proxy", "0") == "1" if is_contract else False
+
         metrics: Dict[str, Any] = {
             "has_eth_history": has_eth_history,
+            "has_history": has_eth_history,  # Frontend expects this field name
             "first_ts": first_ts,
             "last_ts": last_ts,
+            "age_days": (now - first_ts) // 86400 if first_ts else None,
+            "inactive_days": (now - last_ts) // 86400 if last_ts else None,
             "txs_total": len(txs),
             "internal_total": len(internal),
             "token_txs_total": len(tokentx),
+            "is_contract": is_contract,
+            "contract_verified": contract_verified,
+            "contract_proxy": contract_proxy,
         }
 
         balance_eth = 0.0
@@ -695,7 +709,7 @@ class Etherscan:
             last_activity_str = "N/A" if last_ts is None else f"{(now - last_ts) // 86400} days ago"
 
             self.log.info(
-                f"📈 Analysis: {'Empty' if empty_wallet else 'Active'} wallet, Age: {age_str}, Last activity: {last_activity_str}",
+                f"Analysis: {'Empty' if empty_wallet else 'Active'} wallet, Age: {age_str}, Last activity: {last_activity_str}",
                 extra={
                     "event": "analysis_summary",
                     "empty_wallet": empty_wallet,
@@ -709,7 +723,7 @@ class Etherscan:
         # ========== STEP 3: Apply risk scoring rules ==========
         if self.log:
             self.log.info(
-                f"⚖️  Step 3/3: Applying {11} security rules (Base score: {BASE_SCORE})",
+                f"Step 3/3: Applying {11} security rules (Base score: {BASE_SCORE})",
                 extra={"event": "scoring_start", "base_score": BASE_SCORE}
             )
 
@@ -739,9 +753,9 @@ class Etherscan:
 
             # Log each rule application
             if self.log and delta != 0:  # Only log rules that affected the score
-                emoji = "🔴" if delta < 0 else "🟢"
+                marker = "[-]" if delta < 0 else "[+]"
                 self.log.info(
-                    f"{emoji} Rule: {rule_name} ({delta:+d}) → Score: {score}",
+                    f"{marker} Rule: {rule_name} ({delta:+d}) -> Score: {score}",
                     extra={
                         "event": "rule_applied",
                         "rule": rule_name,
@@ -758,10 +772,9 @@ class Etherscan:
 
         # Log final evaluation result
         if self.log:
-            tier_emoji = {"critical":"🛑","high":"⚠️","medium":"🟡","low":"🟢","very_low":"✅"}[tier]
             rules_triggered = sum(1 for r in reasons if r.delta != 0)
             self.log.info(
-                f"{tier_emoji} Evaluation Complete: Score {score}/100 ({tier.replace('_', ' ').title()}) - {rules_triggered} rules triggered in {elapsed:.2f}s",
+                f"Evaluation Complete: Score {score}/100 ({tier.replace('_', ' ').title()}) - {rules_triggered} rules triggered in {elapsed:.2f}s",
                 extra={
                     "event": "evaluation_complete",
                     "address": address,
@@ -775,6 +788,15 @@ class Etherscan:
 
         if mode == "score":
             return score
+
+        # Extract rule-based metrics from reasons for frontend display
+        for reason in reasons:
+            if reason.key == "failed_tx_ratio":
+                metrics["failed_tx_ratio"] = reason.details.get("ratio", 0.0)
+            elif reason.key == "unique_cps_90d":
+                metrics["unique_counterparties_90d"] = reason.details.get("unique", 0)
+            elif reason.key == "dust_incoming_eth_90d":
+                metrics["dust_incoming_90d"] = reason.details.get("count", 0)
 
         # Build human-friendly wallet details
         wallet_details = self._build_wallet_details(
