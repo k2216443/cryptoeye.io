@@ -9,6 +9,7 @@ COPY nginx.conf /etc/nginx/nginx.conf
 # Copy static files
 COPY *.html /usr/share/nginx/html/
 COPY *.jpg /usr/share/nginx/html/
+COPY *.ico /usr/share/nginx/html/
 
 # Expose port 80
 EXPOSE 8000
