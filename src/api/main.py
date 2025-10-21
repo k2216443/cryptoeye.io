@@ -28,6 +28,13 @@ async def lifespan(app: FastAPI):
     app.state.scanner = Etherscan(logger=log)
     yield
 
+class HealthCheckFilter(logging.Filter):
+    """Filter out health check endpoint logs"""
+    def filter(self, record: logging.LogRecord) -> bool:
+        # Filter out /health and /api/health requests from uvicorn access logs
+        message = record.getMessage()
+        return not ("/health" in message and ("GET" in message or "HEAD" in message))
+
 def setup_logging() -> logging.Logger:
     level = os.getenv("LOG_LEVEL", "INFO").upper()
     log_file = os.getenv("LOG_FILE", "/var/log/cryptoeye.json.log")
@@ -62,10 +69,14 @@ def setup_logging() -> logging.Logger:
         lg.setLevel(level)
         lg.propagate = False
 
+        # Add health check filter to access logger
+        if name == "uvicorn.access":
+            lg.addFilter(HealthCheckFilter())
+
     lg = logging.getLogger("cryptoeye")
 
     # inherit handler
-    lg.propagate = True 
+    lg.propagate = True
     return lg
 
 log = setup_logging()
