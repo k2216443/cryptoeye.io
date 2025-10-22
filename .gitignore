@@ -1,4 +1,5 @@
-composer/*.log
+src/static/favicon.ico:Zone.Identifie
+rcomposer/*.log
 .env
 venv
 
